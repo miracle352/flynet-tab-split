@@ -1,7 +1,23 @@
 import { DEMO_USERS } from "@/auth/demoUsers";
 import { LoginForm } from "./LoginForm";
 
-export default function LoginPage() {
+/** Same guard as `safeNext` in middleware: relative, not protocol-relative. */
+function safeNext(value: string | string[] | undefined): string | undefined {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) {
+    return undefined;
+  }
+  return candidate;
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
+  const { next } = await searchParams;
+  const redirectTo = safeNext(next);
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <main className="flex w-full max-w-md flex-col items-stretch gap-8">
@@ -17,7 +33,7 @@ export default function LoginPage() {
             session cookie and <code>useCurrentUser()</code> stay the same.
           </p>
         </div>
-        <LoginForm users={DEMO_USERS} />
+        <LoginForm users={DEMO_USERS} redirectTo={redirectTo} />
       </main>
     </div>
   );

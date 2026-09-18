@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { displayName } from "@/auth/demoUsers";
-import { formatFly, formatUsdCents } from "@/auth/formatFly";
+import { formatFly, formatUsdCents } from "@/money";
 import { useCurrentUser } from "@/auth/useCurrentUser";
 
 export function HomeClient() {
@@ -59,17 +59,25 @@ export function HomeClient() {
           </dd>
         </div>
       </dl>
-      <button
-        type="button"
-        onClick={async () => {
-          await logout();
-          router.push("/login");
-          router.refresh();
-        }}
-        className="self-start rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-      >
-        Log out
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <a
+          href="/restaurants"
+          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          Pick a venue
+        </a>
+        <button
+          type="button"
+          onClick={async () => {
+            await logout();
+            router.push("/login");
+            router.refresh();
+          }}
+          className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
+        >
+          Log out
+        </button>
+      </div>
     </div>
   );
 }

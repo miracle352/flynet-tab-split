@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   AccountBalance,
   Address,
@@ -47,6 +48,15 @@ function apiKey(): string {
 
 function merchantId(): string | undefined {
   return process.env.FLYNET_MERCHANT_ID || undefined;
+}
+
+/**
+ * Payee for payment intents. Flynet routes FLY to a merchant wallet, so
+ * this is the venue-side account the table settles with. Falls back to
+ * the mock merchant so `MOCK_MODE=true` works with no credentials.
+ */
+export function resolveMerchantId(): string {
+  return merchantId() ?? MOCK_PAYEE_BALANCE_ID;
 }
 
 function delay(ms: number): Promise<void> {
@@ -326,6 +336,48 @@ function locationById(locationId: string): Location {
   );
 }
 
+/**
+ * Deterministic stand-in for `crypto.randomUUID()`.
+ *
+ * In dev, Turbopack gives the page bundle and each route handler their
+ * own instance of this module, so the mock maps below are NOT shared
+ * across them — a page render and an API call would otherwise mint two
+ * different objects for the same input. Deriving ids from the input
+ * keeps every instance in agreement without shared state, and is closer
+ * to the live contract (Flynet returns stable ids).
+ */
+function stableUuid(namespace: string, input: string): string {
+  const hex = createHash("sha1").update(`${namespace}:${input}`).digest("hex");
+  const variant = ((parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    `5${hex.slice(13, 16)}`,
+    `${variant}${hex.slice(17, 20)}`,
+    hex.slice(20, 32),
+  ].join("-");
+}
+
+/** Stable id + timestamp for a venue's mock check-in. */
+function mockCheckInIdentity(locationId: string): {
+  id: string;
+  created_at: string;
+} {
+  const offsetMinutes =
+    createHash("sha1")
+      .update(`flynet-mock-check-in-at:${locationId}`)
+      .digest()
+      .readUInt16BE(0) % 360;
+
+  // A stable moment near the other fixtures' updated_at values.
+  const opened = Date.parse("2026-06-11T18:30:00.000Z");
+
+  return {
+    id: stableUuid("flynet-mock-check-in", locationId),
+    created_at: new Date(opened + offsetMinutes * 60_000).toISOString(),
+  };
+}
+
 function mockWallets(): WalletList {
   const created = "2026-05-11T20:21:07.812609Z";
   const wallets: Wallet[] = [
@@ -435,12 +487,12 @@ export async function checkIn(locationId: string): Promise<CheckIn> {
     if (existing) {
       return existing;
     }
+    const identity = mockCheckInIdentity(locationId);
     const created: CheckIn = {
-      id: crypto.randomUUID(),
+      ...identity,
       object: "check_in",
       location: locationById(locationId),
       blackbird_pay_enabled: true,
-      created_at: new Date().toISOString(),
       ended_at: null,
     };
     mockCheckInsByLocation.set(locationId, created);
@@ -478,7 +530,7 @@ export async function createPaymentIntent(
 
   if (isMockMode()) {
     await mockDelay();
-    const merchant = input.flynet_merchant_id ?? merchantId() ?? MOCK_PAYEE_BALANCE_ID;
+    const merchant = input.flynet_merchant_id ?? resolveMerchantId();
     const idemKey = `${merchant}:${input.idempotency_key}`;
     const existingId = mockIdempotencyKeys.get(idemKey);
     if (existingId) {
@@ -497,7 +549,7 @@ export async function createPaymentIntent(
 
     const now = new Date().toISOString();
     const intent: PendingPaymentIntent = {
-      id: crypto.randomUUID(),
+      id: stableUuid("flynet-mock-payment-intent", idemKey),
       object: "payment_intent",
       payer_account_balance_id: MOCK_PAYER_BALANCE_ID,
       payee_account_balance_id: MOCK_PAYEE_BALANCE_ID,

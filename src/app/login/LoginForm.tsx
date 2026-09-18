@@ -3,10 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { displayName } from "@/auth/demoUsers";
-import { formatFly, formatUsdCents } from "@/auth/formatFly";
+import { formatFly, formatUsdCents } from "@/money";
 import type { CurrentUser } from "@/auth/types";
 
-export function LoginForm({ users }: { users: CurrentUser[] }) {
+export function LoginForm({
+  users,
+  redirectTo,
+}: {
+  users: CurrentUser[];
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +32,7 @@ export function LoginForm({ users }: { users: CurrentUser[] }) {
         } | null;
         throw new Error(body?.error ?? "Login failed");
       }
-      router.push("/");
+      router.push(redirectTo ?? "/");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
