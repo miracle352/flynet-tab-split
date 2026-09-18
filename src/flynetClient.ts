@@ -1,5 +1,10 @@
+import { createHash } from "node:crypto";
+import { DEMO_USERS, findDemoUser } from "./auth/demoUsers";
 import type {
-  AccountBalance,
+  Challenge,
+  ChallengeList,
+  CheckInList,
+  FlynetUser,
   Address,
   CheckIn,
   Location,
@@ -11,7 +16,6 @@ import type {
   PendingPaymentIntent,
   Restaurant,
   RestaurantList,
-  Wallet,
   WalletList,
 } from "./types";
 
@@ -25,8 +29,19 @@ import type {
 
 const MOCK_LATENCY_MS = 250;
 
+/**
+ * Mock mode serves the bundled fixtures instead of calling Flynet.
+ *
+ * `MOCK_MODE=true|false` always wins. When it is unset, fall back to
+ * mock if no API key is configured — a fresh clone should run rather
+ * than 500 on the first request because a gitignored file is missing.
+ */
 function isMockMode(): boolean {
-  return process.env.MOCK_MODE === "true";
+  const flag = process.env.MOCK_MODE;
+  if (flag !== undefined && flag !== "") {
+    return flag === "true";
+  }
+  return !process.env.API_KEY;
 }
 
 function apiBaseUrl(): string {
@@ -47,6 +62,15 @@ function apiKey(): string {
 
 function merchantId(): string | undefined {
   return process.env.FLYNET_MERCHANT_ID || undefined;
+}
+
+/**
+ * Payee for payment intents. Flynet routes FLY to a merchant wallet, so
+ * this is the venue-side account the table settles with. Falls back to
+ * the mock merchant so `MOCK_MODE=true` works with no credentials.
+ */
+export function resolveMerchantId(): string {
+  return merchantId() ?? MOCK_PAYEE_BALANCE_ID;
 }
 
 function delay(ms: number): Promise<void> {
@@ -171,7 +195,6 @@ const WEST_VILLAGE_LOCATION_ID = "c54a3b6a-c31b-49b4-8af1-2dfb70ff3eec";
 
 const MOCK_PAYER_BALANCE_ID = "0b9c2d3e-4f5a-6b7c-8d9e-0a1b2c3d4e5f";
 const MOCK_PAYEE_BALANCE_ID = "3f1c6d8e-0f12-4a5b-8c9d-1e2f3a4b5c6d";
-const MOCK_OWNER_ID = "be9caffa-7f30-462a-b7ab-9cca9edb8ab8";
 
 const flybar: Restaurant = {
   id: FLYBAR_ID,
@@ -326,36 +349,73 @@ function locationById(locationId: string): Location {
   );
 }
 
-function mockWallets(): WalletList {
-  const created = "2026-05-11T20:21:07.812609Z";
-  const wallets: Wallet[] = [
-    {
-      id: "726182e2-865d-4660-b07d-c58e47f482d6",
-      object: "user_wallet",
-      wallet_type: "MEMBERSHIP",
-      address: "0xaF8A2609EEaf253838E90353881987d8218c8056",
-      created_at: created,
-      updated_at: "2026-05-11T20:21:07.812621Z",
-    },
-    {
-      id: "1a11f75b-f893-4eb2-976b-0b35a9ffd410",
-      object: "user_wallet",
-      wallet_type: "SPENDING",
-      address: "0x0DC3837d4Ec7732733fD72736279B365DbC10229",
-      created_at: "2026-05-11T20:21:07.824437Z",
-      updated_at: "2026-05-11T20:21:07.824449Z",
-    },
-  ];
-  const balance: AccountBalance = {
-    id: MOCK_PAYER_BALANCE_ID,
-    object: "account_balance",
-    owner_id: MOCK_OWNER_ID,
-    owner_type: "user",
-    balance: { value: "500250000000000000000", currency: "fly" },
-    balance_usd: { value: 500, currency: "usd" },
-  };
-  return { wallets, balance };
+/**
+ * Deterministic stand-in for `crypto.randomUUID()`.
+ *
+ * In dev, Turbopack gives the page bundle and each route handler their
+ * own instance of this module, so the mock maps below are NOT shared
+ * across them — a page render and an API call would otherwise mint two
+ * different objects for the same input. Deriving ids from the input
+ * keeps every instance in agreement without shared state, and is closer
+ * to the live contract (Flynet returns stable ids).
+ */
+function stableUuid(namespace: string, input: string): string {
+  const hex = createHash("sha1").update(`${namespace}:${input}`).digest("hex");
+  const variant = ((parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    `5${hex.slice(13, 16)}`,
+    `${variant}${hex.slice(17, 20)}`,
+    hex.slice(20, 32),
+  ].join("-");
 }
+
+/** Stable id + timestamp for a venue's mock check-in. */
+function mockCheckInIdentity(locationId: string): {
+  id: string;
+  created_at: string;
+} {
+  const offsetMinutes =
+    createHash("sha1")
+      .update(`flynet-mock-check-in-at:${locationId}`)
+      .digest()
+      .readUInt16BE(0) % 360;
+
+  // A stable moment near the other fixtures' updated_at values.
+  const opened = Date.parse("2026-06-11T18:30:00.000Z");
+
+  return {
+    id: stableUuid("flynet-mock-check-in", locationId),
+    created_at: new Date(opened + offsetMinutes * 60_000).toISOString(),
+  };
+}
+
+/**
+ * Mock wallets for a specific member, so the insufficient-funds check
+ * is meaningful. Without `userId` it falls back to the first demo user.
+ */
+function mockWallets(userId?: string): WalletList {
+  const user = (userId && findDemoUser(userId)) || DEMO_USERS[0];
+  return { wallets: user.wallets, balance: user.balance };
+}
+
+const MOCK_CHALLENGE: Challenge = {
+  id: "c1a2b3c4-d5e6-4f70-8a9b-0c1d2e3f4a5b",
+  object: "challenge",
+  type: "PAYMENT",
+  title: "Pay with Blackbird",
+  description: "Settle your table in FLY to earn a reward.",
+  image: null,
+  threshold: { spend_threshold: { value: "5000", currency: "USD" } },
+  fly_reward: { value: "1000000000000000000", currency: "FLY" },
+  start_time: null,
+  end_time: null,
+  terms: ["One reward per member."],
+  accepted_currencies: ["USD"],
+  created_at: "2026-06-01T00:00:00Z",
+  updated_at: "2026-06-01T00:00:00Z",
+};
 
 export interface ListOptions {
   page?: number;
@@ -435,12 +495,12 @@ export async function checkIn(locationId: string): Promise<CheckIn> {
     if (existing) {
       return existing;
     }
+    const identity = mockCheckInIdentity(locationId);
     const created: CheckIn = {
-      id: crypto.randomUUID(),
+      ...identity,
       object: "check_in",
       location: locationById(locationId),
       blackbird_pay_enabled: true,
-      created_at: new Date().toISOString(),
       ended_at: null,
     };
     mockCheckInsByLocation.set(locationId, created);
@@ -478,7 +538,7 @@ export async function createPaymentIntent(
 
   if (isMockMode()) {
     await mockDelay();
-    const merchant = input.flynet_merchant_id ?? merchantId() ?? MOCK_PAYEE_BALANCE_ID;
+    const merchant = input.flynet_merchant_id ?? resolveMerchantId();
     const idemKey = `${merchant}:${input.idempotency_key}`;
     const existingId = mockIdempotencyKeys.get(idemKey);
     if (existingId) {
@@ -497,7 +557,7 @@ export async function createPaymentIntent(
 
     const now = new Date().toISOString();
     const intent: PendingPaymentIntent = {
-      id: crypto.randomUUID(),
+      id: stableUuid("flynet-mock-payment-intent", idemKey),
       object: "payment_intent",
       payer_account_balance_id: MOCK_PAYER_BALANCE_ID,
       payee_account_balance_id: MOCK_PAYEE_BALANCE_ID,
@@ -517,8 +577,14 @@ export async function createPaymentIntent(
     return intent;
   }
 
+  const merchant = input.flynet_merchant_id ?? merchantId();
+  if (!merchant) {
+    // The docs require this on every create; omitting it 400s upstream.
+    throw new Error("FLYNET_MERCHANT_ID is not set");
+  }
+
   const body = {
-    flynet_merchant_id: input.flynet_merchant_id ?? merchantId(),
+    flynet_merchant_id: merchant,
     customer_user_id: input.customer_user_id,
     amount: input.amount,
     description: input.description,
@@ -616,17 +682,152 @@ export async function getPaymentIntent(
 /** GET /users/me/wallets — OAuth bearer (`read:wallets`) */
 export async function getWalletBalance(
   accessToken?: string,
+  mockUserId?: string,
 ): Promise<WalletList> {
   const live = !isMockMode();
   const token = requireAccessToken(accessToken, live);
 
   if (isMockMode()) {
     await mockDelay();
-    return mockWallets();
+    return mockWallets(mockUserId);
   }
 
   return flynetFetch<WalletList>("/users/me/wallets", {
     auth: "oauth",
     accessToken: token,
   });
+}
+
+/**
+ * GET /users/me/check_ins - OAuth bearer (`read:user_checkins`).
+ *
+ * This is the attributable check-in feed: the subject comes from the
+ * access token. `GET /check_ins` is anonymized and cannot prove who
+ * visited, so anything that needs proof of a visit uses this.
+ */
+export async function listMyCheckIns(
+  accessToken?: string,
+  mockLocationId?: string,
+): Promise<CheckInList> {
+  const live = !isMockMode();
+  const token = requireAccessToken(accessToken, live);
+
+  if (isMockMode()) {
+    await mockDelay();
+    // A small deterministic history so the visits screen has something
+    // real to render. The member's current venue comes first.
+    const history: CheckIn[] = [];
+    if (mockLocationId) {
+      history.push(await checkIn(mockLocationId));
+    }
+    const past: [string, number][] = [
+      [WILLIAMSBURG_LOCATION_ID, 3],
+      [WEST_VILLAGE_LOCATION_ID, 11],
+      [CLOVER_LOCATION_ID, 26],
+    ];
+    for (const [locationId, daysAgo] of past) {
+      if (locationId === mockLocationId) {
+        continue;
+      }
+      const base = await checkIn(locationId);
+      history.push({
+        ...base,
+        created_at: new Date(
+          Date.now() - daysAgo * 86_400_000,
+        ).toISOString(),
+        ended_at: new Date(
+          Date.now() - daysAgo * 86_400_000 + 5_400_000,
+        ).toISOString(),
+      });
+    }
+    history.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return {
+      check_ins: history,
+      pagination: {
+        ...emptyPagination(),
+        total_count: history.length,
+        total_pages: 1,
+      },
+    };
+  }
+
+  const params = new URLSearchParams({ page: "0", page_size: "25" });
+  return flynetFetch<CheckInList>(`/users/me/check_ins?${params}`, {
+    auth: "oauth",
+    accessToken: token,
+  });
+}
+
+/** GET /challenges?restaurant={id} - API key (`read:restaurant_challenges`). */
+export async function listChallenges(
+  restaurantId: string,
+  options: ListOptions = {},
+): Promise<ChallengeList> {
+  if (isMockMode()) {
+    await mockDelay();
+    return {
+      challenges: [MOCK_CHALLENGE],
+      pagination: { ...emptyPagination(), total_count: 1, total_pages: 1 },
+    };
+  }
+
+  const params = new URLSearchParams({
+    restaurant: restaurantId,
+    page: String(options.page ?? 0),
+    page_size: String(options.page_size ?? 50),
+  });
+  return flynetFetch<ChallengeList>(`/challenges?${params}`, { auth: "apiKey" });
+}
+
+function emptyPagination(): Pagination {
+  return {
+    total_count: 0,
+    total_pages: 0,
+    current_page: 0,
+    next_page: null,
+    page_size: 50,
+  };
+}
+
+/** GET /users/me — OAuth bearer (`read:profile`). */
+export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
+  const live = !isMockMode();
+  const token = requireAccessToken(accessToken, live);
+
+  if (isMockMode()) {
+    await mockDelay();
+    const user = DEMO_USERS[0];
+    return {
+      id: user.id,
+      object: "user",
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+    };
+  }
+
+  return flynetFetch<FlynetUser>("/users/me", { auth: "oauth", accessToken: token });
+}
+
+/**
+ * GET /users/me + GET /users/me/wallets merged into the app's
+ * `CurrentUser` shape, so nothing downstream changes between mock and
+ * live.
+ */
+export async function fetchLiveCurrentUser(
+  accessToken: string,
+): Promise<import("./auth/types").CurrentUser> {
+  const [profile, wallets] = await Promise.all([
+    getMyProfile(accessToken),
+    getWalletBalance(accessToken),
+  ]);
+  return {
+    id: profile.id,
+    object: "user",
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    email: profile.email ?? "",
+    wallets: wallets.wallets,
+    balance: wallets.balance,
+  };
 }
