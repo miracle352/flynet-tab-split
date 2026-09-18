@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flynet Tab Split",
-  description: "Split a restaurant tab with Flynet",
+  title: {
+    default: "Flynet Tab Split",
+    template: "%s · Flynet Tab Split",
+  },
+  description:
+    "Split a restaurant bill at the table and settle it in FLY, anchored to a real check-in.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-dvh">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

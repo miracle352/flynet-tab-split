@@ -2,6 +2,15 @@ import type { CurrentUser } from "./types";
 
 const CREATED_AT = "2026-05-11T20:21:07.812609Z";
 
+/**
+ * Demo balances, in wei. The fixtures use 1 FLY = $1 so
+ * `balance_usd.value` (cents) is always FLY * 100 - one exchange rate
+ * everywhere instead of two that disagree.
+ *
+ * Friend B is deliberately short: a typical table share is far more
+ * than 3 FLY, so the insufficient-funds path is demoable.
+ */
+
 export const DEMO_USERS: CurrentUser[] = [
   {
     id: "be9caffa-7f30-462a-b7ab-9cca9edb8ab8",
@@ -32,8 +41,8 @@ export const DEMO_USERS: CurrentUser[] = [
       object: "account_balance",
       owner_id: "be9caffa-7f30-462a-b7ab-9cca9edb8ab8",
       owner_type: "user",
-      balance: { value: "12000000000000000000", currency: "fly" },
-      balance_usd: { value: 1200, currency: "usd" },
+      balance: { value: "500000000000000000000", currency: "fly" },
+      balance_usd: { value: 50000, currency: "usd" },
     },
   },
   {
@@ -65,8 +74,8 @@ export const DEMO_USERS: CurrentUser[] = [
       object: "account_balance",
       owner_id: "6e2c4a91-3b7d-4f18-9c0a-1d5e8f2b4a70",
       owner_type: "user",
-      balance: { value: "5000000000000000000", currency: "fly" },
-      balance_usd: { value: 500, currency: "usd" },
+      balance: { value: "250000000000000000000", currency: "fly" },
+      balance_usd: { value: 25000, currency: "usd" },
     },
   },
   {
@@ -98,8 +107,8 @@ export const DEMO_USERS: CurrentUser[] = [
       object: "account_balance",
       owner_id: "9c8b7a65-4d3e-4210-8f9a-0b1c2d3e4f50",
       owner_type: "user",
-      balance: { value: "1500000000000000000", currency: "fly" },
-      balance_usd: { value: 150, currency: "usd" },
+      balance: { value: "3000000000000000000", currency: "fly" },
+      balance_usd: { value: 300, currency: "usd" },
     },
   },
 ];

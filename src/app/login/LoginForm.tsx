@@ -3,10 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { displayName } from "@/auth/demoUsers";
-import { formatFly, formatUsdCents } from "@/auth/formatFly";
+import { formatFly, formatUsdCents } from "@/money";
 import type { CurrentUser } from "@/auth/types";
 
-export function LoginForm({ users }: { users: CurrentUser[] }) {
+export function LoginForm({
+  users,
+  redirectTo,
+}: {
+  users: CurrentUser[];
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +32,7 @@ export function LoginForm({ users }: { users: CurrentUser[] }) {
         } | null;
         throw new Error(body?.error ?? "Login failed");
       }
-      router.push("/");
+      router.push(redirectTo ?? "/");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -44,21 +50,21 @@ export function LoginForm({ users }: { users: CurrentUser[] }) {
             type="button"
             disabled={pendingId !== null}
             onClick={() => logInAs(user.id)}
-            className="flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-left shadow-sm transition hover:border-zinc-400 hover:shadow disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-500"
+            className="flex w-full items-center justify-between rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 text-left shadow-sm transition hover:border-[var(--line-strong)] hover:shadow disabled:opacity-60"
           >
             <span>
-              <span className="block text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              <span className="block text-base font-semibold text-[var(--ink)]">
                 {displayName(user)}
               </span>
-              <span className="mt-1 block font-mono text-xs text-zinc-500">
+              <span className="mt-1 block font-mono text-xs text-[var(--muted)]">
                 {user.id}
               </span>
             </span>
             <span className="text-right">
-              <span className="block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              <span className="block text-sm font-medium text-[var(--ink)]">
                 {busy ? "Signing in…" : `${formatFly(user.balance.balance.value)} FLY`}
               </span>
-              <span className="block text-xs text-zinc-500">
+              <span className="block text-xs text-[var(--muted)]">
                 {formatUsdCents(user.balance.balance_usd.value)}
               </span>
             </span>
@@ -66,7 +72,7 @@ export function LoginForm({ users }: { users: CurrentUser[] }) {
         );
       })}
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-[var(--danger)]">{error}</p>
       ) : null}
     </div>
   );
