@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flynet Tab Split
 
-## Getting Started
+**Splitting a restaurant bill, settled in $FLY — anchored to a real check-in.**
 
-First, run the development server:
+Splitting a check is still awkward. You either do cash maths at the table or fire off
+five disconnected Venmo requests afterwards. This settles the bill **at the table,
+in the currency the restaurant already accepts**, and ties the whole thing to a
+verifiable visit.
+
+---
+
+## Why this is a Flynet app and not a Splitwise clone
+
+It uses all three Flynet pillars in one short flow, and each one is load-bearing:
+
+| Pillar | What it does here | Why Venmo/Splitwise can't |
+|---|---|---|
+| **Check-in** | Anchors the bill to a real visit at a real venue | They have no idea you were at a restaurant |
+| **Member identity** | Each diner's own wallet pays their own share | No shared member graph to settle against |
+| **Payment Intents** | FLY moves from each member to the venue | Not settled in the venue's own currency |
+| **Challenges** | The settled screen shows the venue's live reward campaigns | No connection to the restaurant's loyalty system |
+
+### One design constraint worth knowing
+
+Flynet v1 has **no peer-to-peer transfer**. A Payment Intent only moves FLY from a
+member's wallet to a **merchant's** wallet. So this app does not reimburse whoever
+fronted the cash — instead **the table settles the check with the venue directly,
+one intent per seat, before anyone pays.** That removes the "one person fronts it,
+then chases everyone" step entirely.
+
+---
+
+## The flow
+
+1. **Check in** at a venue (`/restaurants`).
+2. **Open a table** (`/split`) — enter subtotal and tip, pick who's splitting, even or custom.
+3. **One payment intent per person** is created immediately, each with a unique id.
+4. **Friends pay their share** at `/pay/{intentId}` — a direct link to their own request.
+5. **Live status** (`/tabs/{id}`) polls and flips to **settled** when the last share lands.
+
+Because Flynet has **no friends/social API**, guests are either picked explicitly by
+the host (demo members) or arrive via a **shareable invite link** and authenticate
+themselves. Nobody can be added to a bill without their own wallet.
+
+---
+
+## Running it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+That's it. With no credentials present the app runs in **mock mode** against the
+bundled fixtures in `src/flynetClient.ts` — a fresh clone works, no env file needed.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test           # unit tests (share math, PKCE)
+npm run lint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Environment
 
-## Learn More
+Copy `.env.example` to `.env.local`. Everything is optional in mock mode.
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Purpose |
+|---|---|
+| `MOCK_MODE` | `true`/`false`. Unset means: mock if no `API_KEY`, otherwise live. |
+| `API_BASE_URL` | e.g. `https://api.staging.blackbird.xyz/flynet/v1` |
+| `API_KEY` | Discovery routes (`/restaurants`, `/locations`, `/check_ins`, `/challenges`) |
+| `FLYNET_MERCHANT_ID` | Payee for payment intents — **required** for live payments |
+| `FLYNET_CLIENT_ID` / `_SECRET` | OAuth app credentials |
+| `FLYNET_OAUTH_REDIRECT_URI` | Must match the one registered with your app |
+| `FLYNET_OAUTH_AUTHORIZE_URL` / `_TOKEN_URL` | OAuth endpoints |
+| `FLYNET_OAUTH_SCOPES` | Defaults to `read:profile read:wallets read:user_checkins payments` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Set all the `FLYNET_*` variables and the login page gains a **Connect with Blackbird**
+button (Authorization Code + PKCE). Nothing downstream changes — `getCurrentUser()`
+just starts reading `/users/me` instead of the fixture.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Demo script
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Log in as **Miracle** → Pick a venue → check in at **FLYBAR — CLOVER**.
+2. **Split the bill** → subtotal `186.40`, tip 20%, tick Friend A and Friend B → *Request 3 payments*.
+3. You land on the live table: three pending shares of **74.56 FLY** each.
+4. Open **Friend B's** `/pay/...` link → it refuses: *3 FLY balance, 27 FLY short*.
+   (Friend B is deliberately poor to show the insufficient-funds path.)
+5. Log in as **Friend A** → Pay → the host's board updates live.
+6. Pay the host's share → **Table settled**, with the venue's reward campaign shown.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Layout
+
+```
+src/
+├── money.ts               BigInt wei helpers — no floats, ever
+├── splitBill.ts           the even splitter (remainder on the first share)
+├── flynetClient.ts        every Flynet HTTP call, mock + live branches
+├── types.ts               Flynet wire types
+├── venues.ts              restaurant + location composition
+├── auth/                  session cookie, OAuth + PKCE, current user
+├── tabs/                  tab domain: types, store, service
+└── app/
+    ├── restaurants/       picker + check-in
+    ├── split/             open a table
+    ├── tabs/[id]/         live status + settled screen
+    ├── pay/[intentId]/    one member's payment request
+    ├── join/[code]/       invite link
+    └── api/               route handlers
+```
+
+### Money handling
+
+Every amount is a **stringified integer in wei** (`1 FLY = 10^18`). Parsing, tipping,
+splitting and formatting all stay in `BigInt`. `splitBill` gives the remainder to the
+first share, and the tests assert the shares always sum back to **exactly** the total —
+floating point would silently lose money at this precision.
+
+### Two implementation notes
+
+- **Mock state is derived, not stored.** Turbopack gives the page bundle and each route
+  handler their own copy of a module, so an in-memory `Map` is invisible between them.
+  Mock ids are therefore derived from their input, and tabs persist to `.data/tabs.json`.
+- **Cookies are only written from route handlers.** Next.js throws if you mutate them
+  during render, so pages treat the check-in cookie as read-only.
+
+---
+
+## Status
+
+Working end to end in mock mode. Live mode is wired for every Flynet function
+(`listRestaurants`, `getRestaurantLocations`, `checkIn`, `listChallenges`,
+`getMyProfile`, `getWalletBalance`, `listMyCheckIns`, `createPaymentIntent`,
+`confirmPaymentIntent`, `getPaymentIntent`) but has **not** been exercised against the
+staging API — that needs real credentials.

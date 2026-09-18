@@ -208,3 +208,54 @@ export interface WalletList {
   wallets: Wallet[];
   balance: AccountBalance;
 }
+
+/** GET /users/me/check_ins */
+export interface CheckInList {
+  check_ins: CheckIn[];
+  pagination: Pagination;
+}
+
+export type ChallengeType = "PAYMENT" | "REFERRALS" | "DINES" | "PASSPORT";
+
+/**
+ * GET /challenges — a restaurant's reward campaign. Money fields are
+ * wei strings; the docs warn currency casing is not guaranteed.
+ */
+export interface Challenge {
+  id: string;
+  object: "challenge";
+  type: ChallengeType;
+  title: string;
+  description: string;
+  image: string | null;
+  threshold: {
+    spend_threshold?: { value: string; currency: string };
+    dine_threshold?: number;
+    referral_threshold?: number;
+    minimum_spend?: { value: string; currency: string };
+  };
+  fly_reward: { value: string; currency: string };
+  start_time: string | null;
+  end_time: string | null;
+  terms: string[];
+  accepted_currencies: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** GET /challenges */
+export interface ChallengeList {
+  challenges: Challenge[];
+  pagination: Pagination;
+}
+
+/** GET /users/me */
+export interface FlynetUser {
+  id: string;
+  object: "user";
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  created_at?: string;
+  updated_at?: string;
+}

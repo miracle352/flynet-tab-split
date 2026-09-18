@@ -1,3 +1,4 @@
+import { fetchLiveCurrentUser } from "@/flynetClient";
 import { findDemoUser } from "./demoUsers";
 import { getSession } from "./session";
 import type { CurrentUser } from "./types";
@@ -13,5 +14,15 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!session) {
     return null;
   }
+
+  // A real OAuth token means a real member: read them from Flynet.
+  if (session.accessToken) {
+    try {
+      return await fetchLiveCurrentUser(session.accessToken);
+    } catch {
+      return null;
+    }
+  }
+
   return findDemoUser(session.userId) ?? null;
 }
