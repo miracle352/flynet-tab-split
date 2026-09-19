@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/currentUser";
 import { getActiveCheckIn } from "@/checkInState";
 import { Chip } from "@/components/ui";
-import { checkIn } from "@/flynetClient";
+import { checkIn } from "@/flytabClient";
 import { memberName } from "@/users/types";
 import type { CheckIn } from "@/types";
 import { loadVenueCatalog } from "@/venues";

@@ -6,11 +6,11 @@ import { cookies } from "next/headers";
  * tab) knows where they are. Mirrors `auth/session.ts`.
  *
  * Only the ids live in the cookie — the full `CheckIn` is always
- * re-read from `flynetClient.checkIn()`, which is idempotent per
+ * re-read from `flytabClient.checkIn()`, which is idempotent per
  * location, so there is no second source of truth to go stale.
  */
 
-const CHECK_IN_COOKIE = "flynet_check_in";
+const CHECK_IN_COOKIE = "flytab_check_in";
 
 export interface ActiveCheckIn {
   locationId: string;

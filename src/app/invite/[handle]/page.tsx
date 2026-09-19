@@ -12,7 +12,7 @@ import { listMembers } from "@/users/store";
 
 export const metadata: Metadata = {
   title: "You're invited",
-  description: "Join Flynet Tab Split and settle your share at the table.",
+  description: "Join FlyTab and settle your share at the table.",
 };
 
 /**
@@ -50,7 +50,7 @@ export default async function InvitePage({
         <Avatar name={memberName(inviter)} hue={inviter.avatar_hue} size={72} />
         <div>
           <h1 className="display">
-            {inviter.first_name} invited you to Flynet Tab Split
+            {inviter.first_name} invited you to FlyTab
           </h1>
           <p className="mx-auto mt-3 max-w-md text-[0.875rem] leading-6 text-[var(--muted)]">
             Split the check at the table and settle your share in FLY. Create an

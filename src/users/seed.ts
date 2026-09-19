@@ -12,7 +12,7 @@ import type { Member } from "./types";
  * never rendered anywhere in the product.
  */
 
-export const SEED_PASSWORD = "flynet-table-2026";
+export const SEED_PASSWORD = "flytab-table-2026";
 
 const CREATED_AT = "2026-05-11T20:21:07.812609Z";
 
@@ -33,7 +33,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "miracle",
     first_name: "Miracle",
     last_name: "Iyanuoluwa",
-    email: "miracle@flynet.xyz",
+    email: "miracle@flytab.xyz",
     fly: "842500000000000000000",
     usdt: "310250000000000000000",
     hue: 168,
@@ -43,7 +43,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "amara",
     first_name: "Amara",
     last_name: "Osei",
-    email: "amara.osei@flynet.xyz",
+    email: "amara.osei@flytab.xyz",
     fly: "412800000000000000000",
     usdt: "64000000000000000000",
     hue: 24,
@@ -53,7 +53,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "kwame",
     first_name: "Kwame",
     last_name: "Mensah",
-    email: "kwame@flynet.xyz",
+    email: "kwame@flytab.xyz",
     // Deliberately short, so the "fund your wallet" path is reachable.
     fly: "3000000000000000000",
     usdt: "0",
@@ -64,7 +64,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "sofia",
     first_name: "Sofía",
     last_name: "Rossi",
-    email: "sofia.rossi@flynet.xyz",
+    email: "sofia.rossi@flytab.xyz",
     fly: "196400000000000000000",
     usdt: "488000000000000000000",
     hue: 330,
@@ -74,7 +74,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "yuki",
     first_name: "Yuki",
     last_name: "Tanaka",
-    email: "yuki.tanaka@flynet.xyz",
+    email: "yuki.tanaka@flytab.xyz",
     fly: "77100000000000000000",
     usdt: "15500000000000000000",
     hue: 200,
@@ -84,7 +84,7 @@ const PEOPLE: SeedPerson[] = [
     handle: "diego",
     first_name: "Diego",
     last_name: "Marín",
-    email: "diego.marin@flynet.xyz",
+    email: "diego.marin@flytab.xyz",
     fly: "1240000000000000000000",
     usdt: "9250000000000000000",
     hue: 96,

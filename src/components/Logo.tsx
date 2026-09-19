@@ -23,7 +23,7 @@ export function LogoMark({
       viewBox="0 0 40 40"
       className={className}
       role="img"
-      aria-label="Flynet Tab Split"
+      aria-label="FlyTab"
     >
       <defs>
         <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
@@ -77,10 +77,10 @@ export function Wordmark({
       <LogoMark size={size} />
       <span className="flex flex-col leading-none">
         <span className="text-[0.9375rem] font-semibold tracking-[-0.02em]">
-          Flynet
+          FlyTab
         </span>
         <span className="mt-0.5 text-[0.6875rem] font-medium tracking-[0.14em] text-[var(--muted)] uppercase">
-          Tab Split
+          Split the check
         </span>
       </span>
     </span>

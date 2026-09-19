@@ -7,7 +7,7 @@ import {
   getOAuthConfig,
 } from "@/auth/oauth";
 
-export const OAUTH_STATE_COOKIE = "flynet_oauth";
+export const OAUTH_STATE_COOKIE = "flytab_oauth";
 
 /**
  * GET /api/auth/oauth/start
@@ -20,9 +20,9 @@ export async function GET(request: Request) {
   const config = getOAuthConfig();
   if (!config) {
     return new Response(
-      "OAuth is not configured. Set FLYNET_CLIENT_ID, FLYNET_CLIENT_SECRET, " +
-        "FLYNET_OAUTH_REDIRECT_URI, FLYNET_OAUTH_AUTHORIZE_URL and " +
-        "FLYNET_OAUTH_TOKEN_URL.",
+      "OAuth is not configured. Set FLYTAB_CLIENT_ID, FLYTAB_CLIENT_SECRET, " +
+        "FLYTAB_OAUTH_REDIRECT_URI, FLYTAB_OAUTH_AUTHORIZE_URL and " +
+        "FLYTAB_OAUTH_TOKEN_URL.",
       { status: 503 },
     );
   }

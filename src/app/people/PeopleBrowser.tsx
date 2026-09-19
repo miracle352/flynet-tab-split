@@ -23,7 +23,7 @@ interface SplitWith {
 }
 
 /**
- * The people graph: search anybody on Flynet, keep the ones you split
+ * The people graph: search anybody on FlyTab, keep the ones you split
  * with, and start a table with them in one tap.
  */
 export function PeopleBrowser({
