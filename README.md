@@ -5,7 +5,7 @@
 Splitting a check is still awkward. You either do cash maths at the table or fire off
 five disconnected payment requests afterwards. This settles the bill **at the table,
 in the currency the venue already accepts**, and ties the whole thing to a verifiable
-visit — with a wallet, a live FLY quote, and a history behind every payment.
+visit, with a wallet, a live FLY quote, and a history behind every payment.
 
 ---
 
