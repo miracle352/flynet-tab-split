@@ -252,9 +252,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Link href={user ? "/" : "/login"} className="flex shrink-0 items-center gap-2.5">
             <LogoMark size={34} />
             <span className="hidden flex-col leading-none sm:flex">
-              <span className="text-[0.9375rem] font-semibold tracking-[-0.02em]">Flynet</span>
+              <span className="text-[0.9375rem] font-semibold tracking-[-0.02em]">FlyTab</span>
               <span className="mt-0.5 text-[0.625rem] font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
-                Tab Split
+                Split the check
               </span>
             </span>
           </Link>
@@ -339,7 +339,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <div className="max-w-sm">
               <span className="flex items-center gap-2.5">
                 <LogoMark size={28} />
-                <span className="text-sm font-semibold tracking-tight">Flynet Tab Split</span>
+                <span className="text-sm font-semibold tracking-tight">FlyTab</span>
               </span>
               <p className="mt-3 text-[0.8125rem] leading-6 text-[var(--muted)]">
                 Split the check at the table. Every seat pays the venue directly
@@ -370,7 +370,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex flex-col gap-2 border-t border-[var(--line)] pt-5 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
-            <span>© {new Date().getFullYear()} Flynet Tab Split</span>
+            <span>© {new Date().getFullYear()} FlyTab</span>
             <span className="flex items-center gap-2">
               <Chip tone="accent" dot>
                 Settlements go member → venue

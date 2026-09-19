@@ -1,4 +1,4 @@
-# Flynet Tab Split
+# FlyTab
 
 **Splitting a restaurant bill, settled in $FLY anchored to a real check-in.**
 
@@ -9,9 +9,9 @@ visit — with a wallet, a live FLY quote, and a history behind every payment.
 
 ---
 
-## Why this is a Flynet app and not a Splitwise clone
+## Why this is a FlyTab app and not a Splitwise clone
 
-It uses all three Flynet pillars in one short flow, and each one is load-bearing:
+It uses all three FlyTab pillars in one short flow, and each one is load-bearing:
 
 | Pillar | What it does here | Why Venmo/Splitwise can't |
 |---|---|---|
@@ -33,7 +33,7 @@ user field, and its `user` filter was removed — passing it is silently ignored
 returns the full unfiltered set. The attributable feed is `GET /users/me/check_ins`,
 where the subject comes from the access token. That is what `/visits` reads.
 
-**3. Flynet has no friends API.** So the people graph lives in this app: search by
+**3. FlyTab has no friends API.** So the people graph lives in this app: search by
 name or handle, follow a personal invite link, or get picked by the host at the
 table. Every payer is a real signed-in account with their own wallet — nobody is
 ever added to a bill as a name on a list.
@@ -84,7 +84,7 @@ npm run dev        # http://localhost:3000
 ```
 
 That's it. With no credentials present the app runs in **mock mode** against the
-bundled fixtures in `src/flynetClient.ts` — a fresh clone works, no env file needed.
+bundled fixtures in `src/flytabClient.ts` — a fresh clone works, no env file needed.
 
 ```bash
 npm test           # unit tests (share math, price buckets, table states, PKCE)
@@ -98,16 +98,16 @@ seeded members re-appear on the next request.
 ### Accounts
 
 Create your own from `/login`, or use one of the seeded members with the shared
-password **`flynet-table-2026`**:
+password **`flytab-table-2026`**:
 
 | Name | Email | Handle | Balance |
 |---|---|---|---|
-| Miracle Iyanuoluwa | `miracle@flynet.xyz` | `@miracle` | 842.5 FLY · 310.25 USDT |
-| Amara Osei | `amara.osei@flynet.xyz` | `@amara` | 412.8 FLY · 64 USDT |
-| Kwame Mensah | `kwame@flynet.xyz` | `@kwame` | **3 FLY · no USDT** — short on purpose |
-| Sofía Rossi | `sofia.rossi@flynet.xyz` | `@sofia` | 196.4 FLY · 488 USDT |
-| Yuki Tanaka | `yuki.tanaka@flynet.xyz` | `@yuki` | 77.1 FLY · 15.5 USDT |
-| Diego Marín | `diego.marin@flynet.xyz` | `@diego` | 1240 FLY · 9.25 USDT |
+| Miracle Iyanuoluwa | `miracle@flytab.xyz` | `@miracle` | 842.5 FLY · 310.25 USDT |
+| Amara Osei | `amara.osei@flytab.xyz` | `@amara` | 412.8 FLY · 64 USDT |
+| Kwame Mensah | `kwame@flytab.xyz` | `@kwame` | **3 FLY · no USDT** — short on purpose |
+| Sofía Rossi | `sofia.rossi@flytab.xyz` | `@sofia` | 196.4 FLY · 488 USDT |
+| Yuki Tanaka | `yuki.tanaka@flytab.xyz` | `@yuki` | 77.1 FLY · 15.5 USDT |
+| Diego Marín | `diego.marin@flytab.xyz` | `@diego` | 1240 FLY · 9.25 USDT |
 
 Kwame is deliberately short so the funding path is easy to walk: pick him at a
 table, watch his payment refused with the exact shortfall, then top him up from
@@ -122,14 +122,14 @@ Copy `.env.example` to `.env.local`. Everything is optional in mock mode.
 | `MOCK_MODE` | `true`/`false`. Unset means: mock if no `API_KEY`, otherwise live. |
 | `API_BASE_URL` | e.g. `https://api.staging.blackbird.xyz/flynet/v1` |
 | `API_KEY` | Discovery routes (`/restaurants`, `/locations`, `/check_ins`, `/challenges`) |
-| `FLYNET_MERCHANT_ID` | Payee for payment intents — **required** for live payments |
-| `FLYNET_CLIENT_ID` / `_SECRET` | OAuth app credentials |
-| `FLYNET_OAUTH_REDIRECT_URI` | Must match the one registered with your app |
-| `FLYNET_OAUTH_AUTHORIZE_URL` / `_TOKEN_URL` | OAuth endpoints |
-| `FLYNET_OAUTH_SCOPES` | Defaults to `read:profile read:wallets read:user_checkins payments` |
+| `FLYTAB_MERCHANT_ID` | Payee for payment intents — **required** for live payments |
+| `FLYTAB_CLIENT_ID` / `_SECRET` | OAuth app credentials |
+| `FLYTAB_OAUTH_REDIRECT_URI` | Must match the one registered with your app |
+| `FLYTAB_OAUTH_AUTHORIZE_URL` / `_TOKEN_URL` | OAuth endpoints |
+| `FLYTAB_OAUTH_SCOPES` | Defaults to `read:profile read:wallets read:user_checkins payments` |
 | `TAB_IDLE_MINUTES` | How long a quiet table stays open before it closes and refunds. Default `120`. |
 
-Set all the `FLYNET_*` variables and the login page gains a **Connect with Blackbird**
+Set all the `FLYTAB_*` variables and the login page gains a **Connect with Blackbird**
 button (Authorization Code + PKCE). Nothing downstream changes — `getCurrentUser()`
 just starts reading `/users/me` instead of the local member store, and payment
 intents are created and confirmed against the real API.
@@ -159,8 +159,8 @@ intents are created and confirmed against the real API.
 src/
 ├── money.ts               BigInt wei helpers — no floats, ever
 ├── splitBill.ts           the even splitter (remainder on the first share)
-├── flynetClient.ts        every Flynet HTTP call, mock + live branches
-├── types.ts               Flynet wire types
+├── flytabClient.ts        every FlyTab HTTP call, mock + live branches
+├── types.ts               FlyTab wire types
 ├── venues.ts              restaurant + location composition
 ├── price/fly.ts           the live quote: microdollar price, 5s buckets, series
 ├── auth/                  session cookie, OAuth + PKCE, scrypt passwords, current user
@@ -235,7 +235,7 @@ fraction so no microdollar is truncated on the way through.
 
 Working end to end in mock mode, exercised over HTTP: sign up, fund, swap, check in,
 open a table, join by link, pay, cover or close empty seats, cancel with refund, idle
-expiry with refund, ledger, and sign out. Live mode is wired for every Flynet function
+expiry with refund, ledger, and sign out. Live mode is wired for every FlyTab function
 (`listRestaurants`, `getRestaurantLocations`, `checkIn`, `listChallenges`,
 `getMyProfile`, `getWalletBalance`, `listMyCheckIns`, `createPaymentIntent`,
 `confirmPaymentIntent`, `cancelPaymentIntent`, `getPaymentIntent`) but has **not** been

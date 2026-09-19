@@ -8,7 +8,7 @@ import { HistoryTabs } from "@/components/HistoryTabs";
 import { LocalTime } from "@/components/TimeAgo";
 import { Card, CardHead, Chip, EmptyState } from "@/components/ui";
 import { ArrowRightIcon, PinIcon, ReceiptIcon } from "@/components/icons";
-import { listMyCheckIns } from "@/flynetClient";
+import { listMyCheckIns } from "@/flytabClient";
 import { formatFly } from "@/money";
 import { expireStaleTabs } from "@/tabs/service";
 import type { CheckIn } from "@/types";

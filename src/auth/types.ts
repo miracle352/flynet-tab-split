@@ -48,4 +48,4 @@ export interface Session {
   accessToken: string | null;
 }
 
-export const SESSION_COOKIE = "flynet_session";
+export const SESSION_COOKIE = "flytab_session";

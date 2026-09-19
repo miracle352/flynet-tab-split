@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/currentUser";
 import { getSession } from "@/auth/session";
 import { ArrowRightIcon } from "@/components/icons";
-import { listChallenges } from "@/flynetClient";
+import { listChallenges } from "@/flytabClient";
 import { expireStaleTabs } from "@/tabs/service";
 import { getTab } from "@/tabs/store";
 import { balanceFor } from "@/tabs/service";

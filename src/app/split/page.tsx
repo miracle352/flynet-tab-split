@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/auth/currentUser";
 import { getActiveCheckIn } from "@/checkInState";
 import { Chip } from "@/components/ui";
 import { ArrowRightIcon, PinIcon } from "@/components/icons";
-import { checkIn } from "@/flynetClient";
+import { checkIn } from "@/flytabClient";
 import { getMembersByIds } from "@/users/store";
 import { toPublicMember } from "@/users/types";
 import { SplitForm } from "./SplitForm";
