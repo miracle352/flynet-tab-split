@@ -13,7 +13,7 @@ import { OAUTH_STATE_COOKIE } from "../start/route";
  *
  * This is the only place the session is written for real OAuth, which
  * is what keeps the swap contained: every consumer downstream reads
- * `getCurrentUser()` / `useCurrentUser()` and never changes.
+ * `getCurrentUser()` and never changes.
  */
 export async function GET(request: Request) {
   const config = getOAuthConfig();

@@ -1,13 +1,14 @@
 import { fetchLiveCurrentUser } from "@/flynetClient";
-import { findDemoUser } from "./demoUsers";
+import { getMember, touchMember } from "@/users/store";
 import { getSession } from "./session";
-import type { CurrentUser } from "./types";
+import { toCurrentUser, type CurrentUser } from "./types";
 
 /**
- * Server-side current user. Today this is a demo-user lookup from the
- * session cookie. Swap the body for Flynet `GET /users/me` + wallets
- * when `session.accessToken` is present — keep the `CurrentUser`
- * return type so `useCurrentUser()` and pages stay unchanged.
+ * The signed-in person.
+ *
+ * A session that carries a provider access token is resolved against
+ * that provider first; every other session resolves against the member
+ * directory, which is also where sign-ups are written.
  */
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const session = await getSession();
@@ -15,7 +16,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
-  // A real OAuth token means a real member: read them from Flynet.
   if (session.accessToken) {
     try {
       return await fetchLiveCurrentUser(session.accessToken);
@@ -24,5 +24,13 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     }
   }
 
-  return findDemoUser(session.userId) ?? null;
+  const member = await getMember(session.userId);
+  if (!member) {
+    return null;
+  }
+
+  // Cheap presence signal for "last seen" on the people screen.
+  void touchMember(member.id).catch(() => undefined);
+
+  return toCurrentUser(member);
 }

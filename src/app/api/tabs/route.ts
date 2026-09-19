@@ -2,13 +2,16 @@ import { getCurrentUser } from "@/auth/currentUser";
 import { getSession } from "@/auth/session";
 import { getActiveCheckIn } from "@/checkInState";
 import { resolveMerchantId } from "@/flynetClient";
-import { errorResponse, createTab, type CreateTabInput } from "@/tabs/service";
-import { tabsInvolving } from "@/tabs/store";
+import { errorResponse, createTab, expireStaleTabs, type CreateTabInput } from "@/tabs/service";
 import type { SplitMode } from "@/tabs/types";
 
 /**
  * POST /api/tabs   open a table from the host's active check-in
- * GET  /api/tabs   tabs the caller hosts or has a seat at
+ * GET  /api/tabs   tables the caller hosts or has a seat at
+ *
+ * The GET also clears tables that went idle, so a stale table disappears
+ * from every client at the same moment and anything paid against it is
+ * handed back.
  */
 
 async function requireSession() {
@@ -25,7 +28,15 @@ export async function GET() {
   if (!auth) {
     return Response.json({ error: "Not signed in" }, { status: 401 });
   }
-  return Response.json({ tabs: await tabsInvolving(auth.user.id) });
+
+  const tabs = await expireStaleTabs();
+  const mine = tabs.filter(
+    (tab) =>
+      tab.host_user_id === auth.user.id ||
+      tab.shares.some((share) => share.user_id === auth.user.id),
+  );
+
+  return Response.json({ tabs: mine });
 }
 
 export async function POST(request: Request) {

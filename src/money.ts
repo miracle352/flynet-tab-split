@@ -56,6 +56,75 @@ export function formatUsdCents(cents: number): string {
   });
 }
 
+// --- Generic decimal amounts (USDT rides the same 18-decimal unit) ---
+
+/** Parse a human-entered amount into an 18-decimal integer. */
+export function parseDecimalToWei(input: string): bigint {
+  const cleaned = input.trim().replace(/,/g, "");
+  if (!/^\d+(\.\d+)?$/.test(cleaned)) {
+    throw new MoneyError(`"${input}" is not a valid amount`);
+  }
+  const [whole, fraction = ""] = cleaned.split(".");
+  if (fraction.length > MAX_DECIMALS) {
+    throw new MoneyError(`At most ${MAX_DECIMALS} decimal places are supported`);
+  }
+  return BigInt(whole) * FLY_WEI + BigInt(fraction.padEnd(MAX_DECIMALS, "0"));
+}
+
+/** Thousands separators for the whole part. */
+function group(whole: bigint): string {
+  return whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/**
+ * Format an 18-decimal integer for display, keeping at most
+ * `maxFraction` decimals and never printing a trailing ".0".
+ */
+export function formatDecimal(
+  value: string | bigint,
+  maxFraction = 2,
+): string {
+  const n = typeof value === "bigint" ? value : BigInt(value);
+  const negative = n < BigInt(0);
+  const abs = negative ? -n : n;
+  let whole = abs / FLY_WEI;
+  const fractionDigits = abs % FLY_WEI;
+
+  if (maxFraction <= 0 || fractionDigits === BigInt(0)) {
+    return `${negative ? "-" : ""}${group(whole)}`;
+  }
+
+  const padded = fractionDigits.toString().padStart(MAX_DECIMALS, "0");
+  let shown = BigInt(padded.slice(0, maxFraction));
+
+  // Round the last shown digit up when the remainder is at least half,
+  // and carry into the whole part when that pushes past the limit
+  // (0.999 at two decimals is 1.00, not 0.100).
+  const nextDigit = Number(padded[maxFraction] ?? "0");
+  if (nextDigit >= 5) {
+    shown += BigInt(1);
+  }
+  const limit = BigInt(10) ** BigInt(maxFraction);
+  if (shown >= limit) {
+    whole += shown / limit;
+    shown %= limit;
+  }
+
+  const fractionText = shown
+    .toString()
+    .padStart(maxFraction, "0")
+    .replace(/0+$/, "");
+  if (fractionText === "") {
+    return `${negative ? "-" : ""}${group(whole)}`;
+  }
+  return `${negative ? "-" : ""}${group(whole)}.${fractionText}`;
+}
+
+/** USDT is displayed to the cent, the way every stablecoin wallet does. */
+export function formatUsdt(value: string | bigint): string {
+  return formatDecimal(value, 2);
+}
+
 export function sumFlyWei(values: Iterable<bigint | string>): bigint {
   let total = BigInt(0);
   for (const value of values) {
