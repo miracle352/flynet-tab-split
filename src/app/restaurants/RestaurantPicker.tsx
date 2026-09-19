@@ -1,26 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Avatar, Card, Chip, Spinner } from "@/components/ui";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  ClockIcon,
+  PinIcon,
+  SearchIcon,
+  XIcon,
+} from "@/components/icons";
+import { LocalTime } from "@/components/TimeAgo";
+import { useToast } from "@/components/providers";
 import type { CheckIn } from "@/types";
 import type { VenueOption } from "@/venues";
-import { CheckInConfirmation } from "./CheckInConfirmation";
 
 function priceTier(price: number | null): string {
   if (price === null || price <= 0) {
-    return "—";
+    return "";
   }
   return "$".repeat(Math.min(price, 4));
 }
 
-function initial(name: string): string {
-  return name.trim().charAt(0).toUpperCase() || "?";
+/** Deterministic tile gradient, so a venue always looks the same. */
+function tileHue(name: string): number {
+  let hash = 0;
+  for (let index = 0; index < name.length; index += 1) {
+    hash = (hash * 31 + name.charCodeAt(index)) >>> 0;
+  }
+  return hash % 360;
 }
 
-interface RestaurantPickerProps {
-  venues: VenueOption[];
-  totalCount: number;
-  truncated: boolean;
-  initialCheckIn: CheckIn | null;
+function streetOf(location: VenueOption["locations"][number]): string {
+  return (
+    [
+      location.address.street,
+      location.address.city,
+      location.address.state,
+      location.address.zipcode,
+    ]
+      .filter(Boolean)
+      .join(", ") || "Address not listed"
+  );
 }
 
 export function RestaurantPicker({
@@ -28,17 +50,57 @@ export function RestaurantPicker({
   totalCount,
   truncated,
   initialCheckIn,
-}: RestaurantPickerProps) {
-  const [checkIn, setCheckIn] = useState<CheckIn | null>(initialCheckIn);
-  const [picking, setPicking] = useState(initialCheckIn === null);
-  const [pendingLocationId, setPendingLocationId] = useState<string | null>(
-    null,
-  );
+}: {
+  venues: VenueOption[];
+  totalCount: number;
+  truncated: boolean;
+  initialCheckIn: CheckIn | null;
+}) {
+  const { push } = useToast();
+  const [checkInState, setCheckInState] = useState<CheckIn | null>(initialCheckIn);
+  const [query, setQuery] = useState("");
+  const [cuisine, setCuisine] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCheckIn(locationId: string) {
+  const cuisines = useMemo(() => {
+    const set = new Set<string>();
+    for (const venue of venues) {
+      for (const item of venue.restaurant.cuisine) {
+        set.add(item);
+      }
+    }
+    return [...set].sort();
+  }, [venues]);
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return venues.filter(({ restaurant, locations }) => {
+      const matchesCuisine = !cuisine || restaurant.cuisine.includes(cuisine);
+      if (!matchesCuisine) {
+        return false;
+      }
+      if (!needle) {
+        return true;
+      }
+      const haystack = [
+        restaurant.name,
+        ...restaurant.cuisine,
+        ...locations.map((location) =>
+          [location.name, location.neighborhood.name, location.neighborhood.region].join(" "),
+        ),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(needle);
+    });
+  }, [venues, query, cuisine]);
+
+  const locationCount = filtered.reduce((total, venue) => total + venue.locations.length, 0);
+
+  async function handleCheckIn(locationId: string, venueName: string) {
     setError(null);
-    setPendingLocationId(locationId);
+    setPendingId(locationId);
     try {
       const res = await fetch("/api/check-ins", {
         method: "POST",
@@ -46,159 +108,306 @@ export function RestaurantPicker({
         body: JSON.stringify({ locationId }),
       });
       if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(body?.error ?? "Check-in failed");
       }
       const data = (await res.json()) as { check_in: CheckIn };
-      setCheckIn(data.check_in);
-      setPicking(false);
+      setCheckInState(data.check_in);
+      push({
+        title: `Checked in at ${venueName}`,
+        description: "You can open a table whenever the check lands.",
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Check-in failed");
+      push({
+        title: "Could not check in",
+        description: err instanceof Error ? err.message : undefined,
+        tone: "error",
+      });
     } finally {
-      setPendingLocationId(null);
+      setPendingId(null);
     }
   }
 
   async function handleLeave() {
-    setError(null);
-    setPendingLocationId("__leave__");
+    setPendingId("__leave__");
     try {
       await fetch("/api/check-ins", { method: "DELETE" });
-      setCheckIn(null);
-      setPicking(true);
+      setCheckInState(null);
+      push({ title: "Check-in cleared", tone: "info" });
     } finally {
-      setPendingLocationId(null);
+      setPendingId(null);
     }
-  }
-
-  if (!picking && checkIn) {
-    return (
-      <CheckInConfirmation
-        checkIn={checkIn}
-        leaving={pendingLocationId === "__leave__"}
-        onLeave={handleLeave}
-      />
-    );
   }
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-baseline justify-between gap-4">
-        <p className="text-sm text-[var(--muted)]">
-          {venues.length} of {totalCount} venues
-        </p>
-        {truncated ? (
-          <p className="text-xs text-[var(--muted)]">More venues not loaded</p>
-        ) : null}
-      </div>
-
-      {venues.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-[var(--line-strong)] p-6 text-sm text-[var(--muted)]">
-          No venues available yet.
-        </p>
-      ) : null}
-
-      {venues.map(({ restaurant, locations }) => (
-        <section
-          key={restaurant.id}
-          className="overflow-hidden card"
-        >
-          <div className="flex items-start gap-4 border-b border-[var(--line)] px-5 py-4">
+      {/* Active check-in */}
+      {checkInState ? (
+        <Card className="rise overflow-hidden border-[color-mix(in_srgb,var(--accent)_35%,var(--line))]">
+          <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center">
             <span
-              aria-hidden="true"
-              className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--ink)] text-base font-semibold text-[var(--bg)]"
+              className="flex size-14 shrink-0 items-center justify-center rounded-[var(--radius)] text-xl font-semibold text-white"
+              style={{
+                background: `linear-gradient(145deg, hsl(${tileHue(checkInState.location.restaurant.name)} 58% 46%), hsl(${(tileHue(checkInState.location.restaurant.name) + 40) % 360} 52% 32%))`,
+              }}
             >
-              {initial(restaurant.name)}
+              {checkInState.location.restaurant.name.charAt(0)}
             </span>
+
             <div className="min-w-0 flex-1">
-              <h2 className="truncate text-base font-semibold text-[var(--ink)]">
-                {restaurant.name}
-              </h2>
-              <p className="mt-0.5 text-sm text-[var(--muted)]">
-                {restaurant.cuisine.length > 0
-                  ? restaurant.cuisine.join(" · ")
-                  : "Cuisine not listed"}
-                {"  ·  "}
-                {priceTier(restaurant.price)}
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-semibold tracking-tight">
+                  {checkInState.location.restaurant.name}
+                </h2>
+                <Chip tone="accent" dot>
+                  Checked in
+                </Chip>
+              </div>
+              <p className="mt-1 text-[0.8125rem] text-[var(--muted)]">
+                {checkInState.location.name ?? checkInState.location.neighborhood.name} ·{" "}
+                {checkInState.location.neighborhood.name},{" "}
+                {checkInState.location.neighborhood.region}
+              </p>
+              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[0.75rem] text-[var(--muted)]">
+                <ClockIcon size={13} />
+                <LocalTime
+                  iso={checkInState.created_at}
+                  timeZone={checkInState.location.time_zone}
+                />
+                <span aria-hidden="true">·</span>
+                <span>{checkInState.location.time_zone.replace("_", " ")}</span>
+                {checkInState.blackbird_pay_enabled ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span className="text-[var(--accent)]">Settlement enabled</span>
+                  </>
+                ) : null}
               </p>
             </div>
-            {restaurant.website_url ? (
-              <a
-                href={restaurant.website_url}
-                target="_blank"
-                rel="noreferrer"
-                className="shrink-0 text-sm text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--ink)]"
+
+            <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+              <Link href="/split" className="btn btn-primary">
+                Split the bill
+                <ArrowRightIcon size={16} />
+              </Link>
+              <button
+                type="button"
+                onClick={handleLeave}
+                disabled={pendingId === "__leave__"}
+                className="btn btn-quiet btn-sm"
               >
-                Site
-              </a>
-            ) : null}
+                <XIcon size={14} />
+                {pendingId === "__leave__" ? "Clearing…" : "Check in somewhere else"}
+              </button>
+            </div>
           </div>
+        </Card>
+      ) : null}
 
-          {locations.length === 0 ? (
-            <p className="px-5 py-4 text-sm text-[var(--muted)]">
-              No locations listed for this restaurant.
-            </p>
-          ) : null}
+      {/* Search + filters */}
+      <Card className="rise card-pad flex flex-col gap-4">
+        <div className="relative">
+          <SearchIcon
+            size={18}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]"
+          />
+          <input
+            className="input input-lg pl-10"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search venues, neighborhoods or cuisines"
+            aria-label="Search venues"
+          />
+        </div>
 
-          <ul className="divide-y divide-[var(--line)]">
-            {locations.map((location) => {
-              const busy = pendingLocationId === location.id;
-              const disabled =
-                pendingLocationId !== null || !location.payments_enabled;
-              const street = [
-                location.address.street,
-                location.address.city,
-                location.address.state,
-                location.address.zipcode,
-              ]
-                .filter(Boolean)
-                .join(", ");
-
-              return (
-                <li
-                  key={location.id}
-                  className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-[var(--ink)]">
-                      {location.name ?? restaurant.name}
-                    </p>
-                    <p className="mt-0.5 text-sm text-[var(--muted)]">
-                      {location.neighborhood.name} ·{" "}
-                      {location.neighborhood.region}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[var(--muted)]">
-                      {street || "Address not listed"}
-                    </p>
-                    {location.payments_enabled ? null : (
-                      <p className="mt-1 text-xs text-[var(--pending)]">
-                        Payments not enabled at this location
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    aria-busy={busy}
-                    onClick={() => handleCheckIn(location.id)}
-                    className="shrink-0 rounded-full border border-[var(--line-strong)] px-4 py-2 text-sm font-medium hover:bg-[var(--surface-sunken)] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {busy ? "Checking in…" : "Check in"}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCuisine(null)}
+            className={`btn btn-sm ${cuisine === null ? "btn-ink" : "btn-outline"}`}
+          >
+            All
+          </button>
+          {cuisines.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setCuisine(cuisine === item ? null : item)}
+              className={`btn btn-sm ${cuisine === item ? "btn-ink" : "btn-outline"}`}
+            >
+              {item}
+            </button>
+          ))}
+          <span className="ml-auto text-[0.75rem] text-[var(--muted)]">
+            {filtered.length} {filtered.length === 1 ? "venue" : "venues"} · {locationCount}{" "}
+            {locationCount === 1 ? "location" : "locations"}
+            {truncated ? " · more available" : ""}
+          </span>
+        </div>
+      </Card>
 
       {error ? (
-        <p className="text-sm text-[var(--danger)]" role="alert">
+        <p role="alert" className="alert alert-danger">
           {error}
         </p>
       ) : null}
+
+      {filtered.length === 0 ? (
+        <Card className="rise px-5 py-12 text-center">
+          <p className="text-sm font-semibold">No venues match that</p>
+          <p className="mx-auto mt-1.5 max-w-sm text-[0.8125rem] leading-5 text-[var(--muted)]">
+            Try a different neighborhood or clear the cuisine filter.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setCuisine(null);
+            }}
+            className="btn btn-outline btn-sm mt-4"
+          >
+            Clear filters
+          </button>
+        </Card>
+      ) : null}
+
+      {/* Venue grid */}
+      <div className="stagger grid gap-4 md:grid-cols-2">
+        {filtered.map(({ restaurant, locations }) => {
+          const hue = tileHue(restaurant.name);
+          const isCheckedInHere =
+            checkInState?.location.restaurant.id === restaurant.id;
+
+          return (
+            <Card key={restaurant.id} className="rise overflow-hidden">
+              <div
+                className="relative flex h-24 items-end p-4"
+                style={{
+                  background: `linear-gradient(135deg, hsl(${hue} 54% 44%), hsl(${(hue + 42) % 360} 48% 28%))`,
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-8 -top-10 size-32 rounded-full bg-[rgb(255_255_255/0.14)]"
+                />
+                <div className="relative flex w-full items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-lg font-semibold tracking-tight text-white">
+                      {restaurant.name}
+                    </h2>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[0.75rem] text-[rgb(255_255_255/0.85)]">
+                      <span>
+                        {restaurant.cuisine.length > 0
+                          ? restaurant.cuisine.join(" · ")
+                          : "Cuisine not listed"}
+                      </span>
+                      {priceTier(restaurant.price) ? (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="tnum">{priceTier(restaurant.price)}</span>
+                        </>
+                      ) : null}
+                    </p>
+                  </div>
+                  {isCheckedInHere ? (
+                    <span className="chip" style={{ background: "rgb(255 255 255 / 0.22)", color: "#fff" }}>
+                      <CheckIcon size={13} />
+                      Here now
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <ul className="divide-y divide-[var(--line)]">
+                {locations.length === 0 ? (
+                  <li className="px-5 py-4 text-[0.8125rem] text-[var(--muted)]">
+                    No locations listed yet.
+                  </li>
+                ) : null}
+
+                {locations.map((location) => {
+                  const busy = pendingId === location.id;
+                  const disabled = pendingId !== null || !location.payments_enabled;
+                  const active = checkInState?.location.id === location.id;
+
+                  return (
+                    <li key={location.id} className="flex items-start gap-3 px-4 py-3.5">
+                      <span className="icon-tile mt-0.5 size-9">
+                        <PinIcon size={16} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[0.875rem] font-medium">
+                          {location.name ?? restaurant.name}
+                        </p>
+                        <p className="mt-0.5 text-[0.75rem] text-[var(--muted)]">
+                          {location.neighborhood.name} · {location.neighborhood.region}
+                        </p>
+                        <p className="mt-0.5 truncate text-[0.75rem] text-[var(--muted)]">
+                          {streetOf(location)}
+                        </p>
+                        {!location.payments_enabled ? (
+                          <p className="mt-1.5 text-[0.75rem] text-[var(--pending)]">
+                            Settlement not enabled at this location
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        aria-busy={busy}
+                        onClick={() =>
+                          handleCheckIn(location.id, `${restaurant.name} — ${location.name ?? location.neighborhood.name}`)
+                        }
+                        className={`btn btn-sm shrink-0 ${active ? "btn-outline" : "btn-primary"}`}
+                      >
+                        {busy ? <Spinner size={14} /> : null}
+                        {active ? (
+                          <>
+                            <CheckIcon size={14} />
+                            Checked in
+                          </>
+                        ) : busy ? (
+                          "Checking in…"
+                        ) : (
+                          "Check in"
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {restaurant.website_url ? (
+                <div className="hairline flex items-center justify-between px-4 py-3">
+                  <span className="flex items-center gap-2 text-[0.75rem] text-[var(--muted)]">
+                    <Avatar
+                      name={restaurant.name}
+                      hue={hue}
+                      size={22}
+                    />
+                    {locations.length} {locations.length === 1 ? "location" : "locations"}
+                  </span>
+                  <a
+                    href={restaurant.website_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link text-[0.75rem]"
+                  >
+                    Visit website
+                  </a>
+                </div>
+              ) : null}
+            </Card>
+          );
+        })}
+      </div>
+
+      <p className="text-center text-[0.75rem] text-[var(--muted)]">
+        Showing {filtered.length} of {totalCount} venues. Checking in records the
+        visit against your account — that is what anchors the bill.
+      </p>
     </div>
   );
 }

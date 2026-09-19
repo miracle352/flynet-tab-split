@@ -2,19 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/currentUser";
-import { DEMO_USERS, displayName } from "@/auth/demoUsers";
 import { getActiveCheckIn } from "@/checkInState";
+import { Chip } from "@/components/ui";
+import { ArrowRightIcon, PinIcon } from "@/components/icons";
 import { checkIn } from "@/flynetClient";
+import { getMembersByIds } from "@/users/store";
+import { toPublicMember } from "@/users/types";
 import { SplitForm } from "./SplitForm";
 
 export const metadata: Metadata = {
-  title: "Split the bill · Flynet Tab Split",
+  title: "Split the bill",
+  description: "Open a table, pick who is splitting it, and settle each share in FLY.",
 };
 
-export default async function SplitPage() {
+export default async function SplitPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ with?: string | string[] }>;
+}) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login");
+    redirect("/login?next=/split");
   }
 
   const active = await getActiveCheckIn();
@@ -22,9 +30,9 @@ export default async function SplitPage() {
     redirect("/restaurants");
   }
 
-  // Read-only during render: cookie writes are only allowed in a route
-  // handler or Server Action.
   let venueLabel = "Your table";
+  let venueNeighborhood = "";
+  let timeZone = "UTC";
   try {
     const record = await checkIn(active.locationId);
     venueLabel = [
@@ -33,43 +41,83 @@ export default async function SplitPage() {
     ]
       .filter(Boolean)
       .join(" — ");
+    venueNeighborhood = `${record.location.neighborhood.name}, ${record.location.neighborhood.region}`;
+    timeZone = record.location.time_zone;
   } catch {
     redirect("/restaurants");
   }
 
-  return (
-    <div className="flex flex-col gap-8">
-      <main className="flex w-full max-w-lg flex-col gap-8">
-        <header>
-          <p className="eyebrow">
-            Flynet Tab Split
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)]">
-            Split the bill
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
-            Everyone at the table pays their share straight to the venue in FLY
-            — nobody fronts the cash.
-          </p>
-        </header>
+  const { with: withParam } = await searchParams;
+  const wanted = (Array.isArray(withParam) ? withParam : [withParam]).filter(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
+  const preselected = wanted.length > 0 ? await getMembersByIds(wanted) : [];
 
+  return (
+    <div className="flex flex-col gap-7">
+      <header className="rise flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">Open a table</p>
+          <h1 className="display mt-1.5">Split the bill</h1>
+          <p className="mt-2 max-w-2xl text-[0.875rem] leading-6 text-[var(--muted)]">
+            Enter the check, pick who is sharing it, and every seat gets its own
+            payment request in FLY. Nobody fronts the bill.
+          </p>
+        </div>
+        <Link href="/how-it-works" className="btn btn-quiet btn-sm">
+          How settlement works
+          <ArrowRightIcon size={15} />
+        </Link>
+      </header>
+
+      <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
         <SplitForm
           venueLabel={venueLabel}
+          venueNeighborhood={venueNeighborhood}
+          timeZone={timeZone}
           hostId={user.id}
-          members={DEMO_USERS.map((member) => ({
-            id: member.id,
-            name: displayName(member),
-            balance: member.balance.balance.value,
-          }))}
+          preselected={preselected
+            .filter((member) => member.id !== user.id)
+            .map(toPublicMember)}
         />
 
-        <Link
-          href="/restaurants"
-          className="text-sm text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--ink)]"
-        >
-          Check in somewhere else
-        </Link>
-      </main>
+        <aside className="flex flex-col gap-5">
+          <div className="card card-pad rise flex flex-col gap-3">
+            <span className="flex items-center gap-2">
+              <span
+                className="icon-tile size-9"
+                style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+              >
+                <PinIcon size={17} />
+              </span>
+              <span className="eyebrow">Settling with</span>
+            </span>
+            <p className="text-[0.9375rem] font-semibold tracking-tight">{venueLabel}</p>
+            <p className="text-[0.8125rem] text-[var(--muted)]">{venueNeighborhood}</p>
+            <Chip tone="accent" dot>
+              Check-in active
+            </Chip>
+            <Link href="/restaurants" className="link mt-1 text-[0.8125rem]">
+              Check in somewhere else
+            </Link>
+          </div>
+
+          <div className="card card-pad rise flex flex-col gap-2.5">
+            <p className="eyebrow">Before you open it</p>
+            <ul className="flex flex-col gap-2 text-[0.8125rem] leading-5 text-[var(--ink-soft)]">
+              <li>Seats are fixed when the table opens, so get the head count right.</li>
+              <li>
+                Leave extra seats and share the link — anyone who joins signs in
+                first.
+              </li>
+              <li>
+                A table left idle closes on its own and refunds anything already
+                paid.
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

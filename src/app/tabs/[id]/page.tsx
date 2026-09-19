@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/auth/currentUser";
+import { getSession } from "@/auth/session";
+import { ArrowRightIcon } from "@/components/icons";
 import { listChallenges } from "@/flynetClient";
-import type { Challenge } from "@/types";
+import { expireStaleTabs } from "@/tabs/service";
 import { getTab } from "@/tabs/store";
+import { balanceFor } from "@/tabs/service";
+import type { Challenge } from "@/types";
 import { TabStatus } from "./TabStatus";
 
 export const metadata: Metadata = {
-  title: "Table status · Flynet Tab Split",
+  title: "Table",
+  description: "Live view of who has paid and what is still outstanding.",
 };
 
 export default async function TabPage({
@@ -17,11 +23,15 @@ export default async function TabPage({
 }) {
   const { id } = await params;
 
+  const session = await getSession();
   const user = await getCurrentUser();
-  if (!user) {
+  if (!session || !user) {
     redirect(`/login?next=${encodeURIComponent(`/tabs/${id}`)}`);
   }
 
+  // Reading the list clears idle tables, so this page never shows a
+  // board that should already have closed.
+  await expireStaleTabs();
   const tab = await getTab(id);
   if (!tab) {
     notFound();
@@ -34,8 +44,8 @@ export default async function TabPage({
     redirect("/");
   }
 
-  // The loyalty angle: what this venue is rewarding right now. A failed
-  // lookup must never break the status view.
+  // What this venue is rewarding right now. A failed lookup must never
+  // break the live board.
   let challenges: Challenge[] = [];
   try {
     challenges = (await listChallenges(tab.restaurant_id)).challenges;
@@ -43,25 +53,29 @@ export default async function TabPage({
     challenges = [];
   }
 
-  return (
-    <div className="flex flex-col gap-8">
-      <main className="flex w-full max-w-lg flex-col gap-8">
-        <header>
-          <p className="eyebrow">
-            Flynet Tab Split
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)]">
-            {tab.status === "settled" ? "All settled" : "Who has paid?"}
-          </h1>
-        </header>
+  const balance = await balanceFor(user, session.accessToken);
 
-        <TabStatus
-          tabId={tab.id}
-          currentUserId={user.id}
-          initialTab={tab}
-          challenges={challenges}
-        />
-      </main>
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="rise flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href="/tables"
+          className="btn btn-quiet btn-sm"
+        >
+          All tables
+          <ArrowRightIcon size={15} />
+        </Link>
+        <Link href="/how-it-works" className="link text-[0.8125rem]">
+          How settlement works
+        </Link>
+      </div>
+
+      <TabStatus
+        tabId={tab.id}
+        initialTab={tab}
+        challenges={challenges}
+        balance={balance.toString()}
+      />
     </div>
   );
 }

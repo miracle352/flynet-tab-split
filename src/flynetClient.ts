@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { DEMO_USERS, findDemoUser } from "./auth/demoUsers";
+import { usdCentsFromFly, flyPriceMicro } from "./price/fly";
+import { getMember, listMembers } from "./users/store";
 import type {
   Challenge,
   ChallengeList,
@@ -392,12 +393,30 @@ function mockCheckInIdentity(locationId: string): {
 }
 
 /**
- * Mock wallets for a specific member, so the insufficient-funds check
- * is meaningful. Without `userId` it falls back to the first demo user.
+ * Wallet view for a member, so the insufficient-funds check is
+ * meaningful. Falls back to the first member on the roster.
  */
-function mockWallets(userId?: string): WalletList {
-  const user = (userId && findDemoUser(userId)) || DEMO_USERS[0];
-  return { wallets: user.wallets, balance: user.balance };
+async function mockWallets(userId?: string): Promise<WalletList> {
+  const member =
+    (userId ? await getMember(userId) : null) ?? (await listMembers())[0];
+  if (!member) {
+    throw new FlynetClientError("No member wallet available", 404);
+  }
+  const fly = BigInt(member.balances.fly);
+  return {
+    wallets: member.wallets,
+    balance: {
+      id: `${member.id.slice(0, 8)}-0000-4000-8000-000000000003`,
+      object: "account_balance",
+      owner_id: member.id,
+      owner_type: "user",
+      balance: { value: fly.toString(), currency: "fly" },
+      balance_usd: {
+        value: Number(usdCentsFromFly(fly, flyPriceMicro())),
+        currency: "usd",
+      },
+    },
+  };
 }
 
 const MOCK_CHALLENGE: Challenge = {
@@ -692,6 +711,7 @@ export async function getWalletBalance(
     return mockWallets(mockUserId);
   }
 
+
   return flynetFetch<WalletList>("/users/me/wallets", {
     auth: "oauth",
     accessToken: token,
@@ -796,13 +816,16 @@ export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
 
   if (isMockMode()) {
     await mockDelay();
-    const user = DEMO_USERS[0];
+    const member = (await listMembers())[0];
+    if (!member) {
+      throw new FlynetClientError("No member profile available", 404);
+    }
     return {
-      id: user.id,
+      id: member.id,
       object: "user",
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
+      first_name: member.first_name,
+      last_name: member.last_name,
+      email: member.email,
     };
   }
 
@@ -821,13 +844,63 @@ export async function fetchLiveCurrentUser(
     getMyProfile(accessToken),
     getWalletBalance(accessToken),
   ]);
+  const handle = (profile.email ?? "member").split("@")[0].replace(/[^a-z0-9]/gi, "");
   return {
     id: profile.id,
     object: "user",
+    handle: handle || "member",
     first_name: profile.first_name,
     last_name: profile.last_name,
     email: profile.email ?? "",
+    avatar_hue: (profile.id.charCodeAt(0) * 47) % 360,
     wallets: wallets.wallets,
-    balance: wallets.balance,
+    balance: { fly: wallets.balance.balance.value, usdt: "0" },
+    connected_wallet: null,
+    created_at: profile.created_at ?? new Date().toISOString(),
   };
+}
+
+/**
+ * POST /payment_intents/{id}/cancel.
+ *
+ * Used when a host cancels a table: the outstanding requests have to go
+ * away with it, or the venue is left holding payments nobody will make.
+ */
+export async function cancelPaymentIntent(
+  paymentIntentId: string,
+  accessToken?: string,
+): Promise<PaymentIntent> {
+  const live = !isMockMode();
+  const token = requireAccessToken(accessToken, live);
+
+  if (isMockMode()) {
+    await mockDelay();
+    const now = new Date().toISOString();
+    const current = mockPaymentIntents.get(paymentIntentId);
+    if (!current) {
+      throw new FlynetClientError(
+        `Payment intent ${paymentIntentId} not found`,
+        404,
+      );
+    }
+    if (current.status !== "pending") {
+      return current;
+    }
+    const canceled: PaymentIntent = {
+      ...current,
+      status: "canceled",
+      canceled_at: now,
+      paid_at: null,
+      refunded_at: null,
+      updated_at: now,
+    };
+    mockPaymentIntents.set(canceled.id, canceled);
+    return canceled;
+  }
+
+  return flynetFetch<PaymentIntent>(`/payment_intents/${paymentIntentId}/cancel`, {
+    method: "POST",
+    auth: "oauth",
+    accessToken: token,
+  });
 }
