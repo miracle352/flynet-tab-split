@@ -4,7 +4,10 @@ import { splitBill } from "./splitBill.ts";
 import {
   FLY_WEI,
   applyTipPercent,
+  formatDecimal,
   formatFly,
+  formatUsdt,
+  parseDecimalToWei,
   parseFlyToWei,
   sumFlyWei,
 } from "./money.ts";
@@ -70,5 +73,33 @@ describe("split end-to-end", () => {
     const shares = splitBill(total.toString(), 5).map(BigInt);
     assert.equal(sumFlyWei(shares), total);
     assert.equal(formatFly(total), "223.68");
+  });
+});
+
+describe("decimal amounts (USDT rides the same unit)", () => {
+  it("parses stablecoin amounts into 18-decimal units", () => {
+    assert.equal(parseDecimalToWei("12.5"), wei(12n) + FLY_WEI / 2n);
+    assert.equal(parseDecimalToWei("0"), 0n);
+  });
+
+  it("rejects anything that is not an amount", () => {
+    assert.throws(() => parseDecimalToWei("twelve"));
+    assert.throws(() => parseDecimalToWei("-1"));
+    assert.throws(() => parseDecimalToWei(""));
+  });
+
+  it("formats to two decimals, rounding the last shown digit", () => {
+    assert.equal(formatUsdt(wei(1234n)), "1,234");
+    assert.equal(formatUsdt(wei(12n) + FLY_WEI / 2n), "12.5");
+    // 0.999 -> 1.00 collapses to "1"
+    assert.equal(formatUsdt((FLY_WEI * 999n) / 1000n), "1");
+  });
+
+  it("groups thousands and keeps the sign", () => {
+    assert.equal(formatDecimal(wei(-1234567n), 2), "-1,234,567");
+  });
+
+  it("keeps more precision when asked", () => {
+    assert.equal(formatDecimal(FLY_WEI / 8n, 4), "0.125");
   });
 });
