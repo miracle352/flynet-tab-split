@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { getSession } from "@/auth/session";
 import { getActiveCheckIn } from "@/checkInState";
-import { resolveMerchantId } from "@/flynetClient";
+import { resolveMerchantId } from "@/flytabClient";
 import { errorResponse, createTab, expireStaleTabs, type CreateTabInput } from "@/tabs/service";
 import type { SplitMode } from "@/tabs/types";
 

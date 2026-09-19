@@ -10,12 +10,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Flynet Tab Split — split the check in FLY",
-    template: "%s · Flynet Tab Split",
+    default: "FlyTab — split the check in FLY",
+    template: "%s · FlyTab",
   },
   description:
     "Split a restaurant bill at the table and settle it in FLY. Everyone pays their own share straight to the venue, anchored to a real check-in.",
-  applicationName: "Flynet Tab Split",
+  applicationName: "FlyTab",
   keywords: ["split the bill", "FLY", "restaurant", "check-in", "USDT", "wallet"],
 };
 
