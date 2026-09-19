@@ -24,18 +24,18 @@ It uses all three FlyTab pillars in one short flow, and each one is load-bearing
 
 **1. No peer-to-peer transfer.** A Payment Intent only moves FLY from a member's
 wallet to a **merchant's** wallet. So this app does not reimburse whoever fronted
-the cash — instead **the table settles the check with the venue directly, one
+the cash, instead **the table settles the check with the venue directly, one
 intent per seat, before anyone pays.** Stated on the home page, in the footer of
 every screen, and walked through in full at `/how-it-works`.
 
 **2. The public check-in feed is anonymized.** `GET /check_ins` records carry no
-user field, and its `user` filter was removed — passing it is silently ignored and
+user field, and its `user` filter was removed, passing it is silently ignored and
 returns the full unfiltered set. The attributable feed is `GET /users/me/check_ins`,
 where the subject comes from the access token. That is what `/visits` reads.
 
 **3. FlyTab has no friends API.** So the people graph lives in this app: search by
 name or handle, follow a personal invite link, or get picked by the host at the
-table. Every payer is a real signed-in account with their own wallet — nobody is
+table. Every payer is a real signed-in account with their own wallet, nobody is
 ever added to a bill as a name on a list.
 
 ---
@@ -67,7 +67,7 @@ ever added to a bill as a name on a list.
   you can fund it with USDT by swapping first.
 - A table settles when **every declared seat is paid**. If a seat was declared and
   nobody claimed it, the host either **covers** the remainder or **closes** the table
-  with what was actually collected — the shortfall is stated, never hidden.
+  with what was actually collected, the shortfall is stated, never hidden.
 - **Idle tables close themselves.** A table with no activity for `TAB_IDLE_MINUTES`
   (default **120**) is reaped: it disappears from the board and every paid share is
   refunded.
@@ -84,7 +84,7 @@ npm run dev        # http://localhost:3000
 ```
 
 That's it. With no credentials present the app runs in **mock mode** against the
-bundled fixtures in `src/flytabClient.ts` — a fresh clone works, no env file needed.
+bundled fixtures in `src/flytabClient.ts` a fresh clone works, no env file needed.
 
 ```bash
 npm test           # unit tests (share math, price buckets, table states, PKCE)
@@ -104,7 +104,7 @@ password **`flytab-table-2026`**:
 |---|---|---|---|
 | Miracle Iyanuoluwa | `miracle@flytab.xyz` | `@miracle` | 842.5 FLY · 310.25 USDT |
 | Amara Osei | `amara.osei@flytab.xyz` | `@amara` | 412.8 FLY · 64 USDT |
-| Kwame Mensah | `kwame@flytab.xyz` | `@kwame` | **3 FLY · no USDT** — short on purpose |
+| Kwame Mensah | `kwame@flytab.xyz` | `@kwame` | **3 FLY · no USDT**  short on purpose |
 | Sofía Rossi | `sofia.rossi@flytab.xyz` | `@sofia` | 196.4 FLY · 488 USDT |
 | Yuki Tanaka | `yuki.tanaka@flytab.xyz` | `@yuki` | 77.1 FLY · 15.5 USDT |
 | Diego Marín | `diego.marin@flytab.xyz` | `@diego` | 1240 FLY · 9.25 USDT |
@@ -122,7 +122,7 @@ Copy `.env.example` to `.env.local`. Everything is optional in mock mode.
 | `MOCK_MODE` | `true`/`false`. Unset means: mock if no `API_KEY`, otherwise live. |
 | `API_BASE_URL` | e.g. `https://api.staging.blackbird.xyz/flynet/v1` |
 | `API_KEY` | Discovery routes (`/restaurants`, `/locations`, `/check_ins`, `/challenges`) |
-| `FLYTAB_MERCHANT_ID` | Payee for payment intents — **required** for live payments |
+| `FLYTAB_MERCHANT_ID` | Payee for payment intents, **required** for live payments |
 | `FLYTAB_CLIENT_ID` / `_SECRET` | OAuth app credentials |
 | `FLYTAB_OAUTH_REDIRECT_URI` | Must match the one registered with your app |
 | `FLYTAB_OAUTH_AUTHORIZE_URL` / `_TOKEN_URL` | OAuth endpoints |
@@ -200,8 +200,8 @@ else redirects to `/login?next=…`, and `next` is only honoured for same-origin
 and hand-written classes read the same tokens (`--surface`, `--line`, `--ink`,
 `--muted`, `--accent`, `--pending`, `--danger`).
 
-Components use the `@layer components` classes — `.card`, `.btn`, `.chip`, `.input`,
-`.eyebrow`, `.divider`, `.tabbar`, `.sheet`, `.skeleton` — rather than ad-hoc utility
+Components use the `@layer components` classes  `.card`, `.btn`, `.chip`, `.input`,
+`.eyebrow`, `.divider`, `.tabbar`, `.sheet`, `.skeleton`  rather than ad-hoc utility
 soup, so retheming is a one-line token edit and no `dark:` variants are needed. The
 layout is built mobile-first: a bottom tab bar below `lg`, a sidebar above it.
 
@@ -213,7 +213,7 @@ build never reaches out to a font CDN and the app renders identically offline.
 Every amount is a **stringified integer in wei** (`1 FLY = 10^18`). Parsing, tipping,
 splitting, swapping and formatting all stay in `BigInt`. `splitBill` gives the
 remainder to the first share, and the tests assert the shares always sum back to
-**exactly** the total — floating point would silently lose money at this precision.
+**exactly** the total, floating point would silently lose money at this precision.
 USD figures are microdollars, and swaps scale between the two inside a single
 fraction so no microdollar is truncated on the way through.
 
