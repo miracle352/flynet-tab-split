@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 /**
  * Flynet OAuth 2.0 + PKCE.
  *
- * This module only builds requests and parses responses — it never
+ * This module only builds requests and parses responses; it never
  * touches cookies or Next.js APIs, so it can be unit tested.
  *
  * Configure with:

@@ -3,7 +3,7 @@ import { getSession } from "@/auth/session";
 import { errorResponse, paySeat } from "@/tabs/service";
 
 /**
- * POST /api/tabs/{id}/pay — confirm the caller's own payment intent.
+ * POST /api/tabs/{id}/pay: confirm the caller's own payment intent.
  * A member can only settle their own seat.
  */
 export async function POST(

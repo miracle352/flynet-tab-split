@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { ledgerFor, summarise } from "@/ledger/store";
 
-/** GET /api/ledger — the signed-in member's movement history. */
+/** GET /api/ledger: the signed-in member's movement history. */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   return Response.json({
     entries,
-    // BigInts are not JSON serialisable — the client formats them anyway.
+    // BigInts are not JSON serialisable; the client formats them anyway.
     totals: {
       received_fly: totals.receivedFly.toString(),
       spent_fly: totals.spentFly.toString(),

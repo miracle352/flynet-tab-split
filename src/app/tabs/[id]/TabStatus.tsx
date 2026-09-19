@@ -224,9 +224,9 @@ export function TabStatus({
             <p className="text-[0.875rem] leading-6 text-[var(--ink-soft)]">
               {paid === total
                 ? `All ${total} ${total === 1 ? "share" : "shares"} paid to ${tab.venue_label}.`
-                : `${paid} of ${total} seats paid to ${tab.venue_label} — ${
+                : `${paid} of ${total} seats paid to ${tab.venue_label} (${
                     total - paid
-                  } ${total - paid === 1 ? "seat was" : "seats were"} never claimed.`}{" "}
+                  } ${total - paid === 1 ? "seat was" : "seats were"} never claimed.)`}{" "}
               Everyone keeps a receipt in their history.
             </p>
 
@@ -238,7 +238,7 @@ export function TabStatus({
                 </p>
                 {challenges.map((challenge) => (
                   <p key={challenge.id} className="text-[0.8125rem] leading-5 text-[var(--ink-soft)]">
-                    <span className="font-semibold text-[var(--ink)]">{challenge.title}</span> —{" "}
+                    <span className="font-semibold text-[var(--ink)]">{challenge.title}</span>:{" "}
                     {challenge.description}{" "}
                     <span className="tnum font-semibold text-[var(--accent)]">
                       +{formatFly(challenge.fly_reward.value)} FLY
@@ -488,7 +488,7 @@ export function TabStatus({
               <div className="flex flex-col gap-3 rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--pending)_30%,var(--line))] bg-[var(--pending-soft)] px-4 py-3.5">
                 <p className="text-[0.8125rem] leading-5 text-[var(--pending)]">
                   You are {formatDecimal(BigInt(myShare.amount) - have, 4)} FLY short. Fund your
-                  wallet with FLY, or deposit USDT and swap it — the table stays
+                  wallet with FLY, or deposit USDT and swap it; the table stays
                   open while you do.
                 </p>
                 <Link href="/wallet" className="btn btn-primary btn-sm self-start">

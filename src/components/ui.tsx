@@ -90,7 +90,7 @@ export function Chip({
   );
 }
 
-/** Settlement progress — reads instantly at a glance. */
+/** Settlement progress: reads instantly at a glance. */
 export function ProgressBar({
   paid,
   total,

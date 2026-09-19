@@ -5,7 +5,7 @@ import type { Asset } from "@/ledger/store";
 import { MemberError } from "@/users/store";
 import { executeSwap } from "@/wallet/service";
 
-/** POST /api/wallet/swap — buy FLY with USDT, or the other way round. */
+/** POST /api/wallet/swap: buy FLY with USDT, or the other way round. */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {

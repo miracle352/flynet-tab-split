@@ -6,7 +6,7 @@ import { useNow } from "./TimeAgo";
 /**
  * Counts a table's idle window down, in the venue's own time zone.
  *
- * When it reaches zero the table is on borrowed time — the next read of
+ * When it reaches zero the table is on borrowed time: the next read of
  * the table list closes it and hands back anything that was paid.
  */
 export function Countdown({

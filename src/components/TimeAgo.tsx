@@ -12,7 +12,7 @@ import {
  *
  * The server has no idea when the browser will hydrate, so the first
  * paint shows a placeholder and the real value arrives from the shared
- * clock — no hydration mismatch, no per-component timer.
+ * clock: no hydration mismatch, no per-component timer.
  */
 export function useNow(): number {
   return useSyncExternalStore(subscribeClock, getClockSnapshot, getServerClockSnapshot);
@@ -35,7 +35,7 @@ function describe(diffMs: number): string {
 export function TimeAgo({
   iso,
   className = "",
-  fallback = "—",
+  fallback = "-",
 }: {
   iso: string | null;
   className?: string;
@@ -70,7 +70,7 @@ export function TimeAgo({
   );
 }
 
-/** Wall-clock time in a named time zone — venue-local timestamps. */
+/** Wall-clock time in a named time zone: venue-local timestamps. */
 export function LocalTime({
   iso,
   timeZone,
@@ -83,7 +83,7 @@ export function LocalTime({
   const now = useNow();
 
   if (!iso || now === 0) {
-    return <span className={className}>—</span>;
+    return <span className={className}>-</span>;
   }
 
   const date = new Date(iso);

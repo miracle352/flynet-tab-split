@@ -4,7 +4,7 @@
  * Deterministic code block for a deposit address.
  *
  * Drawn from the address itself, so the same address always renders the
- * same pattern — useful as a visual "is this the address I was given"
+ * same pattern, useful as a visual "is this the address I was given"
  * check on a second device.
  */
 export function QrPattern({

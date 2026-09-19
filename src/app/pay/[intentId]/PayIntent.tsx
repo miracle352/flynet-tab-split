@@ -69,7 +69,7 @@ export function PayIntent({
           This share is already settled
         </p>
         <p className="text-[0.8125rem] leading-5 text-[var(--muted)]">
-          Nothing left to do here — it is in your transaction history.
+          Nothing left to do here; it is in your transaction history.
         </p>
         <Link href={`/tabs/${tabId}`} className="btn btn-outline btn-sm self-start">
           See the table
@@ -97,7 +97,7 @@ export function PayIntent({
         <p role="alert" className="alert alert-pending">
           <span className="font-semibold">Not enough FLY.</span> You have{" "}
           <span className="tnum">{formatDecimal(have, 4)} FLY</span> but this
-          share is <span className="tnum">{formatDecimal(owed, 4)} FLY</span> —{" "}
+          share is <span className="tnum">{formatDecimal(owed, 4)} FLY</span>,{" "}
           <span className="tnum">{formatDecimal(owed - have, 4)} FLY</span> short.
           Fund your wallet with FLY, or deposit USDT and swap it at the live rate.
         </p>

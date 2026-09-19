@@ -2,7 +2,7 @@
  * FLY money helpers.
  *
  * On the wire every FLY amount is a stringified integer in wei
- * (1 FLY = 10^18 wei). Nothing here ever touches a float for money —
+ * (1 FLY = 10^18 wei). Nothing here ever touches a float for money:
  * parse, split, and format all stay in BigInt.
  */
 

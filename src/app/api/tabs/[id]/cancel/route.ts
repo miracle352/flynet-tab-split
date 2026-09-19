@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { cancelTab, errorResponse } from "@/tabs/service";
 
-/** POST /api/tabs/{id}/cancel — host cancels the table; paid shares refund. */
+/** POST /api/tabs/{id}/cancel: host cancels the table; paid shares refund. */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

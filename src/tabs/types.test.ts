@@ -27,7 +27,7 @@ function tab(overrides: Partial<Tab> = {}): Tab {
     check_in_id: "check-in-1",
     location_id: "location-1",
     restaurant_id: "restaurant-1",
-    venue_label: "FLYBAR — CLOVER",
+    venue_label: "FLYBAR - CLOVER",
     venue_time_zone: "America/New_York",
     subtotal: (WEI * 100n).toString(),
     tip_percent: 20,
@@ -125,7 +125,7 @@ describe("share maths", () => {
 
     assert.equal(unclaimedCount(withEmptySeat), 1);
     assert.equal(unclaimedWei(withEmptySeat), WEI * 60n);
-    // Not fully paid — an empty seat is money the venue has not received.
+    // Not fully paid: an empty seat is money the venue has not received.
     assert.equal(isFullyPaid(withEmptySeat), false);
     // But everybody who sat down has settled, so the host can close it.
     assert.equal(awaitingClose(withEmptySeat), true);

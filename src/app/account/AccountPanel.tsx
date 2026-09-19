@@ -38,7 +38,7 @@ export function AccountPanel({ invitePath }: { invitePath: string }) {
             <p className="text-[0.9375rem] font-semibold tracking-tight">Session</p>
             <p className="mt-1 text-[0.8125rem] leading-5 text-[var(--muted)]">
               You are signed in as {user ? `@${user.handle}` : "your account"}. Signing
-              out clears this device — your balances, tables and history stay
+              out clears this device; your balances, tables and history stay
               exactly where they are.
             </p>
           </div>

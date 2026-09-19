@@ -4,7 +4,7 @@
  * Everything the UI shows in dollars is derived from this one number, so
  * there is a single exchange rate on screen instead of two that drift
  * apart. The quote advances on a fixed tick and is a pure function of
- * the tick index — the server and the browser compute the identical
+ * the tick index; the server and the browser compute the identical
  * value for the same moment, which is what keeps a server-rendered
  * price from fighting the live one on hydration.
  *
@@ -55,7 +55,7 @@ export function flyPriceUsd(date: Date = new Date()): number {
   return flyPriceMicro(date) / MICRO_PER_USD;
 }
 
-/** The last `count` quotes, oldest first — feeds the sparkline. */
+/** The last `count` quotes, oldest first: feeds the sparkline. */
 export function priceSeries(count = 48, date: Date = new Date()): number[] {
   const now = bucketAt(date);
   return Array.from({ length: count }, (_, index) =>

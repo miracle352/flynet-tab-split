@@ -40,7 +40,7 @@ export default async function SplitPage({
       record.location.name ?? record.location.neighborhood.name,
     ]
       .filter(Boolean)
-      .join(" — ");
+      .join(" - ");
     venueNeighborhood = `${record.location.neighborhood.name}, ${record.location.neighborhood.region}`;
     timeZone = record.location.time_zone;
   } catch {
@@ -107,7 +107,7 @@ export default async function SplitPage({
             <ul className="flex flex-col gap-2 text-[0.8125rem] leading-5 text-[var(--ink-soft)]">
               <li>Seats are fixed when the table opens, so get the head count right.</li>
               <li>
-                Leave extra seats and share the link — anyone who joins signs in
+                Leave extra seats and share the link; anyone who joins signs in
                 first.
               </li>
               <li>

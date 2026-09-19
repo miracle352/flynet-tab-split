@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { getTab } from "@/tabs/store";
 
-/** GET /api/tabs/{id} — the live status view polls this. */
+/** GET /api/tabs/{id}: the live status view polls this. */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

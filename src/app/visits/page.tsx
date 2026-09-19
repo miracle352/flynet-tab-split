@@ -74,7 +74,7 @@ export default async function VisitsPage() {
           <h1 className="display mt-1.5">Visits</h1>
           <p className="mt-2 max-w-2xl text-[0.875rem] leading-6 text-[var(--muted)]">
             Every check-in is tied to your account, which is what makes a bill
-            provably yours — {totalVisits}{" "}
+            provably yours: {totalVisits}{" "}
             {totalVisits === 1 ? "visit" : "visits"} and {totalSettled} settled{" "}
             {totalSettled === 1 ? "table" : "tables"}.
           </p>
@@ -100,7 +100,7 @@ export default async function VisitsPage() {
               title={failed ? "History unavailable" : "No visits yet"}
               body={
                 failed
-                  ? "The check-in feed could not be reached. Your tables still work — this screen is a record, not a gate."
+                  ? "The check-in feed could not be reached. Your tables still work; this screen is a record, not a gate."
                   : "Check in at a venue and every visit after that lands here, with the tables you settled while you were there."
               }
               icon={<PinIcon size={20} />}

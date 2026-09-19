@@ -1,5 +1,5 @@
 /**
- * splitBill — split a FLY total evenly, remainder on the first share.
+ * splitBill: split a FLY total evenly, remainder on the first share.
  *
  * FLY amounts are strings in the smallest unit (wei), 18 decimals:
  *   1 FLY === "1000000000000000000"

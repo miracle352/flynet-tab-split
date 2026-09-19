@@ -10,7 +10,7 @@ import path from "node:path";
  * others. A JSON file per collection is the smallest thing every module
  * instance and every browser session agrees on.
  *
- * The exported surface is the whole contract — swap these four
+ * The exported surface is the whole contract: swap these four
  * functions for a real database and nothing else changes.
  */
 

@@ -65,7 +65,7 @@ export default async function InvitePage({
             {
               icon: <ShieldIcon size={17} />,
               title: "Your own wallet",
-              body: "You pay your own share straight to the venue — nobody fronts cash for you.",
+              body: "You pay your own share straight to the venue; nobody fronts cash for you.",
             },
             {
               icon: <CheckIcon size={17} />,

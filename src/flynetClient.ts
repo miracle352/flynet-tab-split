@@ -34,7 +34,7 @@ const MOCK_LATENCY_MS = 250;
  * Mock mode serves the bundled fixtures instead of calling Flynet.
  *
  * `MOCK_MODE=true|false` always wins. When it is unset, fall back to
- * mock if no API key is configured — a fresh clone should run rather
+ * mock if no API key is configured; a fresh clone should run rather
  * than 500 on the first request because a gitignored file is missing.
  */
 function isMockMode(): boolean {
@@ -275,7 +275,7 @@ const clover: Location = {
 const williamsburg: Location = {
   id: WILLIAMSBURG_LOCATION_ID,
   object: "location",
-  name: "FLYBAR — Williamsburg",
+  name: "FLYBAR - Williamsburg",
   restaurant: flybar,
   neighborhood: {
     id: "9f4b1c20-7e3a-4d18-9c2f-1a5d6b8e0c44",
@@ -355,7 +355,7 @@ function locationById(locationId: string): Location {
  *
  * In dev, Turbopack gives the page bundle and each route handler their
  * own instance of this module, so the mock maps below are NOT shared
- * across them — a page render and an API call would otherwise mint two
+ * across them; a page render and an API call would otherwise mint two
  * different objects for the same input. Deriving ids from the input
  * keeps every instance in agreement without shared state, and is closer
  * to the live contract (Flynet returns stable ids).
@@ -451,7 +451,7 @@ export interface CreatePaymentIntentInput {
   metadata?: Record<string, unknown> | null;
 }
 
-/** GET /restaurants — API key */
+/** GET /restaurants: API key */
 export async function listRestaurants(
   options: ListOptions = {},
 ): Promise<RestaurantList> {
@@ -474,7 +474,7 @@ export async function listRestaurants(
   });
 }
 
-/** GET /restaurants/{id}/locations — API key */
+/** GET /restaurants/{id}/locations: API key */
 export async function getRestaurantLocations(
   restaurantId: string,
   options: ListOptions = {},
@@ -547,7 +547,7 @@ export async function checkIn(locationId: string): Promise<CheckIn> {
   return checkInRecord;
 }
 
-/** POST /payment_intents — OAuth bearer */
+/** POST /payment_intents: OAuth bearer */
 export async function createPaymentIntent(
   input: CreatePaymentIntentInput,
   accessToken?: string,
@@ -620,7 +620,7 @@ export async function createPaymentIntent(
   });
 }
 
-/** POST /payment_intents/{id}/confirm — OAuth bearer */
+/** POST /payment_intents/{id}/confirm: OAuth bearer */
 export async function confirmPaymentIntent(
   paymentIntentId: string,
   userId: string,
@@ -672,7 +672,7 @@ export async function confirmPaymentIntent(
   );
 }
 
-/** GET /payment_intents/{id} — OAuth bearer */
+/** GET /payment_intents/{id}: OAuth bearer */
 export async function getPaymentIntent(
   paymentIntentId: string,
   accessToken?: string,
@@ -698,7 +698,7 @@ export async function getPaymentIntent(
   });
 }
 
-/** GET /users/me/wallets — OAuth bearer (`read:wallets`) */
+/** GET /users/me/wallets: OAuth bearer (`read:wallets`) */
 export async function getWalletBalance(
   accessToken?: string,
   mockUserId?: string,
@@ -809,7 +809,7 @@ function emptyPagination(): Pagination {
   };
 }
 
-/** GET /users/me — OAuth bearer (`read:profile`). */
+/** GET /users/me: OAuth bearer (`read:profile`). */
 export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
   const live = !isMockMode();
   const token = requireAccessToken(accessToken, live);

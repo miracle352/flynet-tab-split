@@ -142,7 +142,7 @@ export async function assertAffordable(
   if (available < owed) {
     throw new TabError(
       `Not enough FLY. You have ${formatFly(available)} but this share is ` +
-        `${formatFly(owed)} — ${formatFly(owed - available)} short.`,
+        `${formatFly(owed)} (${formatFly(owed - available)} short).`,
       402,
     );
   }
@@ -152,7 +152,7 @@ export async function assertAffordable(
 /**
  * Creates one pending payment intent.
  *
- * Keyed per (tab, payer, purpose) so a retry never double-charges — the
+ * Keyed per (tab, payer, purpose) so a retry never double-charges; the
  * purpose matters because a host can settle both their own seat and the
  * seats nobody claimed on the same table.
  */
@@ -169,8 +169,8 @@ async function openSeatIntent(
       amount: { value: amountWei, currency: "FLY" },
       description:
         purpose === "cover"
-          ? `${tab.venue_label} — covering the empty seats`
-          : `${tab.venue_label} — table share`,
+          ? `${tab.venue_label} - covering the empty seats`
+          : `${tab.venue_label} - table share`,
       idempotency_key: `${tab.id}:${payerId}:${purpose}`,
       flynet_merchant_id: tab.merchant_id,
       expires_at: tab.expires_at,
@@ -206,7 +206,7 @@ export async function createTab(
     record.location.name ?? record.location.neighborhood.name,
   ]
     .filter(Boolean)
-    .join(" — ");
+    .join(" - ");
 
   const picked = await getMembersByIds(input.participantIds ?? []);
   const people = [
@@ -353,7 +353,7 @@ export async function paySeat(
     throw new TabError("That table no longer exists", 404);
   }
   if (tab.status === "canceled") {
-    throw new TabError("That table was canceled — nothing left to pay", 409);
+    throw new TabError("That table was canceled; nothing left to pay", 409);
   }
   if (isExpired(tab)) {
     throw new TabError("That table closed because it went idle", 410);
@@ -434,7 +434,7 @@ async function refundPaidShares(tab: Tab, reason: string): Promise<Tab> {
       direction: "in",
       asset: "FLY",
       amount: share.amount,
-      label: `Refund — ${tab.venue_label}`,
+      label: `Refund: ${tab.venue_label}`,
       detail: reason,
       venue_label: tab.venue_label,
       tab_id: tab.id,
@@ -588,7 +588,7 @@ export async function coverUnclaimedSeats(
 /**
  * The host closes a table that still has empty seats.
  *
- * Settles with what was actually collected — the venue receives the paid
+ * Settles with what was actually collected: the venue receives the paid
  * shares and the settled screen states the shortfall plainly, rather
  * than pretending the whole check landed.
  */

@@ -363,7 +363,7 @@ export function WalletConsole({
           <Card className="overflow-hidden">
             <CardHead
               title="Add funds"
-              hint="Deposit FLY or USDT — both are spendable at the table"
+              hint="Deposit FLY or USDT: both are spendable at the table"
               icon={<ArrowDownIcon size={17} />}
             />
             <div className="divider flex flex-col gap-5 px-5 py-5">
@@ -716,7 +716,7 @@ export function WalletConsole({
                   <p className="text-[0.8125rem] leading-6 text-[var(--ink-soft)]">
                     A connected wallet lets you pull FLY or USDT in from somewhere
                     you already hold it. If you arrived without one, create a
-                    self-custody wallet — it takes seconds and you keep the keys.
+                    self-custody wallet: it takes seconds and you keep the keys.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -760,7 +760,7 @@ export function WalletConsole({
           <Card className="overflow-hidden">
             <CardHead
               title="Deposit addresses"
-              hint="One per asset — send only the matching token"
+              hint="One per asset: send only the matching token"
               icon={<ArrowUpIcon size={17} />}
             />
             <div className="divider flex flex-col gap-5 px-5 py-5">
@@ -813,7 +813,7 @@ export function WalletConsole({
 
         <div className="hairline mt-5 pt-4">
           <p className="text-[0.8125rem] leading-5 text-[var(--ink-soft)]">
-            Don&apos;t have one of these? Create a self-custody wallet instead —
+            Don&apos;t have one of these? Create a self-custody wallet instead;
             you get an address and a recovery key you keep yourself.
           </p>
           <button
@@ -853,7 +853,7 @@ export function WalletConsole({
             </div>
             <CopyField value={created.address} label="Wallet address" />
             <p className="alert alert-pending">
-              Anyone with these words controls this wallet. Store them offline —
+              Anyone with these words controls this wallet. Store them offline, as
               there is no way to recover them later.
             </p>
             <button

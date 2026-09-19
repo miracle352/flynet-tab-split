@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Flynet Tab Split — split the check in FLY",
+    default: "Flynet Tab Split: split the check in FLY",
     template: "%s · Flynet Tab Split",
   },
   description:
@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // The first paint and the first poll must agree, or every dollar figure
   // on the page flickers on hydration. The member is resolved here for the
-  // same reason — the shell should know who is signed in on first paint.
+  // same reason: the shell should know who is signed in on first paint.
   const [initialQuote, initialUser] = await Promise.all([
     Promise.resolve(quoteAt()),
     getCurrentUser(),

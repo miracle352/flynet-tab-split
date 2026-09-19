@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { closeTab, errorResponse } from "@/tabs/service";
 
-/** POST /api/tabs/{id}/close — host closes a table that has empty seats. */
+/** POST /api/tabs/{id}/close: host closes a table that has empty seats. */
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

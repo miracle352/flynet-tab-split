@@ -53,7 +53,7 @@ export function JoinTab({
         className="btn btn-primary btn-block btn-lg"
       >
         {pending ? <Spinner size={17} /> : <CheckIcon size={17} />}
-        {pending ? "Taking your seat…" : `Take a seat — ${formatDecimal(amount, 4)} FLY`}
+        {pending ? "Taking your seat…" : `Take a seat (${formatDecimal(amount, 4)} FLY)`}
       </button>
 
       <p className="flex items-start gap-2 text-[0.75rem] leading-5 text-[var(--muted)]">

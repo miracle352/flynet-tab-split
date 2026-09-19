@@ -13,7 +13,7 @@ export const OAUTH_STATE_COOKIE = "flynet_oauth";
  * GET /api/auth/oauth/start
  *
  * Kicks off Authorization Code + PKCE. The verifier and state live in a
- * short-lived httpOnly cookie — never in the URL, so the verifier is
+ * short-lived httpOnly cookie, never in the URL, so the verifier is
  * not leaked to browser history or the referer header.
  */
 export async function GET(request: Request) {

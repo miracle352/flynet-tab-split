@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/auth/currentUser";
 import { getSession } from "@/auth/session";
 import { coverUnclaimedSeats, errorResponse } from "@/tabs/service";
 
-/** POST /api/tabs/{id}/cover — host settles the seats nobody claimed. */
+/** POST /api/tabs/{id}/cover: host settles the seats nobody claimed. */
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

@@ -6,7 +6,7 @@ import type { Location, Restaurant } from "./types";
  *
  * Composes `GET /restaurants` with `GET /restaurants/{id}/locations`
  * so the picker renders in one round trip instead of N+1 fetches from
- * the browser. Keep this out of client components — it pulls in
+ * the browser. Keep this out of client components; it pulls in
  * `flynetClient`, which reads API credentials from `process.env`.
  */
 

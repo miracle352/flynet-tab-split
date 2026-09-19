@@ -132,7 +132,7 @@ export function WalletHero({ firstName }: { firstName: string }) {
         </div>
 
         <p className="text-[0.75rem] text-[#c9f0e3]">
-          Hi {firstName} — funds settle straight to the venue when your table pays.
+          Hi {firstName}, funds settle straight to the venue when your table pays.
         </p>
       </div>
     </section>

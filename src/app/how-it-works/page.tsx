@@ -30,7 +30,7 @@ const STEPS = [
     n: "02",
     icon: <SparkIcon size={18} />,
     title: "Open a table and split it",
-    body: "Enter the subtotal and the tip, then choose how it divides — evenly, or a different amount per seat. Seats are fixed the moment the table opens.",
+    body: "Enter the subtotal and the tip, then choose how it divides: evenly, or a different amount per seat. Seats are fixed the moment the table opens.",
     detail: "Even splits push the odd remainder onto the first seat, so the shares always add back to the total exactly.",
   },
   {
@@ -38,21 +38,21 @@ const STEPS = [
     icon: <WalletIcon size={18} />,
     title: "Every seat gets its own request",
     body: "One payment request per person, in FLY, created up front. People you picked see it when they sign in; anybody else arrives through the table link.",
-    detail: "Each request is unique and idempotent — reopening the app never double-charges a seat.",
+    detail: "Each request is unique and idempotent, so reopening the app never double-charges a seat.",
   },
   {
     n: "04",
     icon: <ArrowRightIcon size={18} />,
     title: "Each person pays the venue",
     body: "Settlement goes from a member's wallet to the venue's wallet. Nobody fronts the bill, so there is nothing to chase and no one is out of pocket.",
-    detail: "Short on FLY? Fund your wallet with FLY or USDT and swap — the table stays open while you do.",
+    detail: "Short on FLY? Fund your wallet with FLY or USDT and swap; the table stays open while you do.",
   },
   {
     n: "05",
     icon: <CheckIcon size={18} />,
     title: "The table settles itself",
     body: "When the last share lands, the table closes, everyone keeps a receipt, and the venue's reward campaigns show up on the settled screen.",
-    detail: "The live board updates as shares land — no refreshing, no asking who has paid.",
+    detail: "The live board updates as shares land, with no refreshing and no asking who has paid.",
   },
   {
     n: "06",
@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
           Most splitting apps move money between friends afterwards. This settles
           the check <em>with the restaurant</em>, one share per seat, while
           everybody is still sitting at the table. That single change is what
-          removes the awkward part — no IOUs, no &ldquo;I&apos;ll send it
+          removes the awkward part: no IOUs, no &ldquo;I&apos;ll send it
           later&rdquo;, no one person covering the table on a card.
         </p>
       </header>
@@ -132,7 +132,7 @@ export default function HowItWorksPage() {
               </div>
               <Note tone="accent">
                 If you paid by card at the table instead, settle your share in FLY
-                here anyway — the venue sees the whole check covered, and the
+                here anyway. The venue sees the whole check covered, and the
                 person who fronted the card is not left waiting on four transfers.
               </Note>
             </div>
@@ -179,7 +179,7 @@ export default function HowItWorksPage() {
               <p className="text-[0.875rem] leading-6 text-[var(--ink-soft)]">
                 One quote drives every dollar figure in the app. It refreshes
                 every few seconds, so a balance, a share and a swap are always
-                priced against the same number — never two rates that disagree.
+                priced against the same number, never two rates that disagree.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Chip tone="accent" dot>

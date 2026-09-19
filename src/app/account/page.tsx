@@ -104,12 +104,12 @@ export default async function AccountPage() {
             <dl className="divider flex flex-col px-5 py-4">
               <KeyValue label="Spending wallet">
                 <span className="font-mono text-[0.75rem]">
-                  {user.wallets.find((wallet) => wallet.wallet_type === "SPENDING")?.address ?? "—"}
+                  {user.wallets.find((wallet) => wallet.wallet_type === "SPENDING")?.address ?? "-"}
                 </span>
               </KeyValue>
               <KeyValue label="Membership wallet">
                 <span className="font-mono text-[0.75rem]">
-                  {user.wallets.find((wallet) => wallet.wallet_type === "MEMBERSHIP")?.address ?? "—"}
+                  {user.wallets.find((wallet) => wallet.wallet_type === "MEMBERSHIP")?.address ?? "-"}
                 </span>
               </KeyValue>
               {user.connected_wallet ? (

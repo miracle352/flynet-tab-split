@@ -5,7 +5,7 @@ import type { Member } from "./types";
 /**
  * The starting roster.
  *
- * These are ordinary member accounts with real balances — they show up
+ * These are ordinary member accounts with real balances; they show up
  * in people search, can be picked onto a table by a host, and settle
  * their own shares when they sign in. `SEED_PASSWORD` is a repo
  * convenience for exercising the multi-payer flow (see README); it is

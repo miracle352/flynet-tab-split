@@ -9,7 +9,7 @@ import { MemberError, createMember } from "@/users/store";
 const WELCOME_FLY = BigInt(120) * FLY_WEI;
 const WELCOME_USDT = BigInt(50) * FLY_WEI;
 
-/** POST /api/auth/signup — create an account and sign straight in. */
+/** POST /api/auth/signup: create an account and sign straight in. */
 export async function POST(request: Request) {
   let body: {
     firstName?: unknown;

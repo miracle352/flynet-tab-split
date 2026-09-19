@@ -5,7 +5,7 @@ import type { Tab } from "./types";
  * Tab persistence.
  *
  * One JSON file, serialized writes. The exported surface is the whole
- * contract — replace these functions with a database and nothing else in
+ * contract: replace these functions with a database and nothing else in
  * the app changes.
  */
 

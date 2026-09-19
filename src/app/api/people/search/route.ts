@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { searchMembers } from "@/users/store";
 
-/** GET /api/people/search?q=… — name, @handle or email. */
+/** GET /api/people/search?q=…: name, @handle or email. */
 export async function GET(request: Request) {
   const user = await getCurrentUser();
   if (!user) {

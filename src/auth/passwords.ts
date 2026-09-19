@@ -52,7 +52,7 @@ export function verifyPassword(password: string, stored: string | null): boolean
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-/** Stable pseudo-random hex from a seed — used for wallet addresses. */
+/** Stable pseudo-random hex from a seed, used for wallet addresses. */
 export function deterministicHex(seed: string, bytes: number): string {
   let out = "";
   let round = 0;
@@ -63,7 +63,7 @@ export function deterministicHex(seed: string, bytes: number): string {
   return out.slice(0, bytes * 2);
 }
 
-/** `0xAbCd…1234` — the way wallets show an address. */
+/** `0xAbCd…1234`: the way wallets show an address. */
 export function shortAddress(address: string, head = 6, tail = 4): string {
   if (address.length <= head + tail + 1) {
     return address;

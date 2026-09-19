@@ -3,7 +3,7 @@ import { setSession } from "@/auth/session";
 import { toCurrentUser } from "@/auth/types";
 import { getMemberByEmail } from "@/users/store";
 
-/** POST /api/auth/login — email + password. */
+/** POST /api/auth/login: email + password. */
 export async function POST(request: Request) {
   let body: { email?: unknown; password?: unknown };
   try {

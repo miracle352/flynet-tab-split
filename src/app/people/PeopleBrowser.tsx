@@ -146,7 +146,7 @@ export function PeopleBrowser({
               title={query ? "Nobody matches that" : "No people yet"}
               body={
                 query
-                  ? "Check the spelling, or invite them with a table link — they can create an account in seconds."
+                  ? "Check the spelling, or invite them with a table link. They can create an account in seconds."
                   : "Split a bill with somebody and they land here automatically."
               }
               icon={<PeopleIcon size={20} />}
@@ -289,8 +289,8 @@ export function PeopleBrowser({
           <div className="divider flex flex-col gap-3 px-5 py-5">
             <p className="text-[0.8125rem] leading-6 text-[var(--ink-soft)]">
               Two ways in: you pick them by name when you open a table, or you
-              send them the table link. Either way they sign in — or create an
-              account — before their seat exists, so every payer is real.
+              send them the table link. Either way they sign in (or create an
+              account) before their seat exists, so every payer is real.
             </p>
             {user ? (
               <div className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] px-3.5 py-2.5">
@@ -338,7 +338,7 @@ export function PeopleBrowser({
             </div>
 
             <p className="text-[0.8125rem] leading-6 text-[var(--ink-soft)]">
-              Balances stay private — you will only ever see what they owe on a
+              Balances stay private; you will only ever see what they owe on a
               table you share, and whether their share has settled.
             </p>
 

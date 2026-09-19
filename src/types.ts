@@ -2,9 +2,9 @@
  * Flynet API response types.
  *
  * Field names and shapes follow the published OpenAPI schemas and
- * docs examples (https://docs.flynet.org/llms-full.txt,
- * https://docs.flynet.org/api-reference/openapi.yaml). Keep these
- * identical to the live wire format so mocks swap out with no changes.
+ * docs examples (https://docs.flynet.org/api-reference/openapi.yaml).
+ * Keep these identical to the live wire format so mocks swap out with
+ * no changes.
  */
 
 export interface Pagination {
@@ -15,7 +15,7 @@ export interface Pagination {
   page_size: number;
 }
 
-/** `{ value, currency }` — FLY amounts are wei strings, never floats. */
+/** `{ value, currency }`: FLY amounts are wei strings, never floats. */
 export interface Money {
   value: string;
   currency: "FLY";
@@ -97,7 +97,7 @@ export interface LocationList {
 
 /**
  * Check-in object (GET /check_ins/{id}, items in GET /check_ins).
- * No user field — the venue feed is anonymized.
+ * No user field: the venue feed is anonymized.
  */
 export interface CheckIn {
   id: string;
@@ -202,7 +202,7 @@ export interface AccountBalance {
  * GET /users/me/wallets
  *
  * Markdown examples show `{ wallets: [...] }` only. OpenAPI requires
- * `balance` as well — include it so the mock matches the live contract.
+ * `balance` as well; include it so the mock matches the live contract.
  */
 export interface WalletList {
   wallets: Wallet[];
@@ -218,7 +218,7 @@ export interface CheckInList {
 export type ChallengeType = "PAYMENT" | "REFERRALS" | "DINES" | "PASSPORT";
 
 /**
- * GET /challenges — a restaurant's reward campaign. Money fields are
+ * GET /challenges: a restaurant's reward campaign. Money fields are
  * wei strings; the docs warn currency casing is not guaranteed.
  */
 export interface Challenge {

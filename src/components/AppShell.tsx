@@ -343,7 +343,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               </span>
               <p className="mt-3 text-[0.8125rem] leading-6 text-[var(--muted)]">
                 Split the check at the table. Every seat pays the venue directly
-                in FLY, anchored to a real check-in — nobody fronts the bill and
+                in FLY, anchored to a real check-in. Nobody fronts the bill and
                 chases the others afterwards.
               </p>
             </div>

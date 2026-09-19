@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/auth/currentUser";
 import { MemberError, connect, getMember } from "@/users/store";
 
-/** POST /api/people/connect — add somebody to your people graph. */
+/** POST /api/people/connect: add somebody to your people graph. */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {

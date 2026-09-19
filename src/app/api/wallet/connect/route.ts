@@ -8,7 +8,7 @@ import {
   disconnectWallet,
 } from "@/wallet/service";
 
-/** POST /api/wallet/connect — link an installed wallet. */
+/** POST /api/wallet/connect: link an installed wallet. */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   }
 }
 
-/** DELETE /api/wallet/connect — unlink the external wallet. */
+/** DELETE /api/wallet/connect: unlink the external wallet. */
 export async function DELETE() {
   const user = await getCurrentUser();
   if (!user) {

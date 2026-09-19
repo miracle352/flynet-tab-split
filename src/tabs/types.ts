@@ -6,8 +6,8 @@
  * check *with the venue*, one payment intent per seat, before anybody
  * pays in full.
  *
- * Seats are fixed when the tab opens — adding a diner later would change
- * every share and invalidate intents that are already pending — so new
+ * Seats are fixed when the tab opens, because adding a diner later would change
+ * every share and invalidate intents that are already pending; new
  * people claim one of the seats the host already declared.
  *
  * A tab is also *live*: it goes quiet when the table leaves, and a quiet
@@ -46,7 +46,7 @@ export interface Tab {
   location_id: string;
   restaurant_id: string;
   venue_label: string;
-  /** The venue's own time zone — countdowns are shown in local time. */
+  /** The venue's own time zone; countdowns are shown in local time. */
   venue_time_zone: string;
 
   /** FLY wei. */
@@ -55,7 +55,7 @@ export interface Tab {
   /** FLY wei. Sum of every share, exactly. */
   total: string;
 
-  /** Payee — the merchant receiving the table's FLY. */
+  /** Payee: the merchant receiving the table's FLY. */
   merchant_id: string;
 
   shares: TabShare[];
@@ -110,7 +110,7 @@ export function unclaimedWei(tab: Tab): bigint {
 /**
  * Everybody seated has paid, but seats were declared that nobody took.
  *
- * The table does not settle by itself here — that money was never
+ * The table does not settle by itself here; that money was never
  * collected, so the host either covers the empty seats or closes the
  * table with what the venue actually received.
  */

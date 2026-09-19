@@ -4,7 +4,7 @@ import { MoneyError } from "@/money";
 import { createSelfCustodyWallet } from "@/wallet/service";
 
 /**
- * POST /api/wallet/create — issue a wallet for somebody who arrived
+ * POST /api/wallet/create: issue a wallet for somebody who arrived
  * without one. The recovery phrase is returned exactly once.
  */
 export async function POST() {

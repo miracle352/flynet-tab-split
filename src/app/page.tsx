@@ -35,7 +35,7 @@ export default async function Home() {
         record.location.name ?? record.location.neighborhood.name,
       ]
         .filter(Boolean)
-        .join(" — ");
+        .join(" - ");
       venueNeighborhood = `${record.location.neighborhood.name}, ${record.location.neighborhood.region}`;
       atVenue = record.ended_at === null;
     } catch {
@@ -63,7 +63,7 @@ export default async function Home() {
           <p className="mt-2 max-w-xl text-[0.875rem] leading-6 text-[var(--muted)]">
             {venueLabel && atVenue
               ? `You're checked in at ${venueLabel}. Open a table whenever the check lands.`
-              : "Check in at a venue, then split the bill — every seat pays the venue directly in FLY."}
+              : "Check in at a venue, then split the bill. Every seat pays the venue directly in FLY."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -184,7 +184,7 @@ export default async function Home() {
                   {
                     step: "2",
                     title: "Each seat pays the venue",
-                    body: "Nobody fronts the bill and chases the others — money goes member to venue.",
+                    body: "Nobody fronts the bill and chases the others; money goes member to venue.",
                   },
                   {
                     step: "3",

@@ -14,7 +14,7 @@ import { memberName, type Member } from "@/users/types";
  * live quote, and every balance change writes a ledger row.
  */
 
-/** 0.30% — shown on the swap ticket before it is taken. */
+/** 0.30%, shown on the swap ticket before it is taken. */
 export const SWAP_FEE_BPS = 30n;
 
 export interface DepositAddress {
@@ -99,7 +99,7 @@ const BPS_DENOMINATOR = 10_000n;
 
 /**
  * Both assets ride the same 18-decimal unit, while the quote is priced
- * in microdollars — 10^12 of those units make one microdollar. Doing the
+ * in microdollars: 10^12 of those units make one microdollar. Doing the
  * scaling inside the single fraction keeps the conversion exact instead
  * of truncating a microdollar on the way through.
  */
@@ -273,7 +273,7 @@ export interface CreatedWallet {
 /**
  * Creates a self-custody wallet for a member who arrived without one.
  *
- * The recovery phrase is generated here and shown exactly once — it is
+ * The recovery phrase is generated here and shown exactly once; it is
  * never written to the store, which is what a real custodian would do.
  */
 export async function createSelfCustodyWallet(

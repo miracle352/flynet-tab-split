@@ -30,7 +30,7 @@ export default async function JoinPage({
     notFound();
   }
 
-  // Already seated — straight to the live board.
+  // Already seated; straight to the live board.
   const existingSeat = tab.shares.find((share) => share.user_id === user.id);
   if (existingSeat) {
     redirect(`/tabs/${tab.id}`);
@@ -84,7 +84,7 @@ export default async function JoinPage({
             {claimed.length} of {tab.shares.length}
           </KeyValue>
           <KeyValue label="Your share" strong>
-            {freeSeat ? `${formatDecimal(freeSeat.amount, 4)} FLY` : "—"}
+            {freeSeat ? `${formatDecimal(freeSeat.amount, 4)} FLY` : "-"}
           </KeyValue>
         </dl>
 

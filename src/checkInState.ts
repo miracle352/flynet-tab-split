@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
  * confirmation survives a refresh and the next step (splitting the
  * tab) knows where they are. Mirrors `auth/session.ts`.
  *
- * Only the ids live in the cookie — the full `CheckIn` is always
+ * Only the ids live in the cookie; the full `CheckIn` is always
  * re-read from `flynetClient.checkIn()`, which is idempotent per
  * location, so there is no second source of truth to go stale.
  */

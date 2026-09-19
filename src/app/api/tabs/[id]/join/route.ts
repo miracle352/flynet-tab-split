@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/auth/currentUser";
 import { getSession } from "@/auth/session";
 import { errorResponse, joinTab } from "@/tabs/service";
 
-/** POST /api/tabs/{id}/join — claim the lowest free seat. */
+/** POST /api/tabs/{id}/join: claim the lowest free seat. */
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

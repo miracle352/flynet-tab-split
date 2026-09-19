@@ -4,7 +4,7 @@ import { expireStaleTabs } from "@/tabs/service";
 import { connectionsFor } from "@/users/store";
 
 /**
- * GET /api/people — the signed-in member's people graph, plus the
+ * GET /api/people: the signed-in member's people graph, plus the
  * tables and movements that produced it.
  */
 export async function GET() {

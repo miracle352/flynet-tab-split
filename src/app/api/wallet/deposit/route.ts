@@ -5,7 +5,7 @@ import type { Asset } from "@/ledger/store";
 import { MemberError } from "@/users/store";
 import { depositFunds } from "@/wallet/service";
 
-/** POST /api/wallet/deposit — credit an incoming FLY or USDT transfer. */
+/** POST /api/wallet/deposit: credit an incoming FLY or USDT transfer. */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {

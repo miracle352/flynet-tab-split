@@ -26,7 +26,7 @@ const PERKS = [
   {
     icon: <CheckIcon size={18} />,
     title: "One tap at the table",
-    body: "Each seat pays the venue directly — no Venmo chain, no fronting the cash.",
+    body: "Each seat pays the venue directly: no Venmo chain, no fronting the cash.",
   },
 ];
 

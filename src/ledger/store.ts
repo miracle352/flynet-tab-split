@@ -59,7 +59,7 @@ export interface NewEntryInput {
   counterparty?: string | null;
   status?: LedgerStatus;
   created_at?: string;
-  /** Overrides the USD snapshot — used for USDT, which is its own dollar. */
+  /** Overrides the USD snapshot, used for USDT, which is its own dollar. */
   usd_cents?: number;
 }
 
@@ -126,7 +126,7 @@ export async function ledgerFor(
     .slice(0, limit);
 }
 
-/** Everything, newest first — used by the venue-side rollup. */
+/** Everything, newest first, used by the venue-side rollup. */
 export async function allEntries(): Promise<LedgerEntry[]> {
   return mutateJson<LedgerEntry[]>(FILE, [], (current) => current);
 }
@@ -153,7 +153,7 @@ export function summarise(entries: LedgerEntry[]): LedgerTotals {
     const amount = BigInt(entry.amount);
 
     // USDT movements are tallied in USDT, never folded into the FLY
-    // columns — one column per asset, or the totals stop adding up.
+    // columns: one column per asset, or the totals stop adding up.
     if (entry.asset === "USDT") {
       if (entry.kind === "deposit") {
         fundedUsdt += amount / FLY_WEI;

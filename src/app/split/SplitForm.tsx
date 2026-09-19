@@ -308,7 +308,7 @@ export function SplitForm({
       <Card className="rise overflow-hidden">
         <CardHead
           title="Who is splitting it?"
-          hint={`${seatCount} ${seatCount === 1 ? "seat" : "seats"} — you, plus the people you pick`}
+          hint={`${seatCount} ${seatCount === 1 ? "seat" : "seats"} (you, plus the people you pick)`}
           icon={<PeopleIcon size={17} />}
         />
         <div className="divider flex flex-col gap-4 px-5 py-5">
@@ -359,7 +359,7 @@ export function SplitForm({
           {needle !== "" && !searching && searchResults.length === 0 ? (
             <p className="rounded-[var(--radius)] border border-dashed border-[var(--line-strong)] px-4 py-3 text-[0.8125rem] text-[var(--muted)]">
               Nobody matches that yet. Open the table anyway and leave an open
-              seat — they can join with the link and create an account in seconds.
+              seat. They can join with the link and create an account in seconds.
             </p>
           ) : null}
 
@@ -487,7 +487,7 @@ export function SplitForm({
                   }}
                 >
                   {customBalanced
-                    ? "Balanced — the shares add up to the total exactly."
+                    ? "Balanced: the shares add up to the total exactly."
                     : `${formatFly(totalWei - customTotal)} FLY left to assign`}
                 </span>
               ) : null}
@@ -539,8 +539,8 @@ export function SplitForm({
 
           <Note>
             Each seat pays the venue directly in FLY. If somebody is short, they
-            can <Link href="/wallet" className="link">fund their wallet</Link> —
-            with FLY, or with USDT swapped at the live rate — while the table
+            can <Link href="/wallet" className="link">fund their wallet</Link> (with
+            FLY, or with USDT swapped at the live rate) while the table
             stays open.
           </Note>
         </div>

@@ -78,7 +78,7 @@ function Section({
         <div className="divider">
           <EmptyState
             title="Nothing open"
-            body="Check in at a venue and open a table — you can pick people from your contacts or send an invite link."
+            body="Check in at a venue and open a table. You can pick people from your contacts or send an invite link."
             icon={<ReceiptIcon size={20} />}
             action={
               <Link href="/split" className="btn btn-primary btn-sm mt-1">

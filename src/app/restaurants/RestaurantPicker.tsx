@@ -358,7 +358,7 @@ export function RestaurantPicker({
                         disabled={disabled}
                         aria-busy={busy}
                         onClick={() =>
-                          handleCheckIn(location.id, `${restaurant.name} — ${location.name ?? location.neighborhood.name}`)
+                          handleCheckIn(location.id, `${restaurant.name} - ${location.name ?? location.neighborhood.name}`)
                         }
                         className={`btn btn-sm shrink-0 ${active ? "btn-outline" : "btn-primary"}`}
                       >
@@ -406,7 +406,7 @@ export function RestaurantPicker({
 
       <p className="text-center text-[0.75rem] text-[var(--muted)]">
         Showing {filtered.length} of {totalCount} venues. Checking in records the
-        visit against your account — that is what anchors the bill.
+        visit against your account, which is what anchors the bill.
       </p>
     </div>
   );
