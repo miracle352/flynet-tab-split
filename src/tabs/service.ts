@@ -1,12 +1,12 @@
 import { randomInt } from "node:crypto";
 import {
-  FlynetClientError,
+  FlyTabClientError,
   cancelPaymentIntent,
   checkIn,
   confirmPaymentIntent,
   createPaymentIntent,
   getWalletBalance,
-} from "@/flynetClient";
+} from "@/flytabClient";
 import { recordEntry } from "@/ledger/store";
 import { MoneyError, formatFly, parseFlyToWei, sumFlyWei, applyTipPercent } from "@/money";
 import { splitBill } from "@/splitBill";
@@ -59,7 +59,7 @@ export function errorResponse(error: unknown): Response {
   if (error instanceof MoneyError) {
     return Response.json({ error: error.message }, { status: 400 });
   }
-  if (error instanceof FlynetClientError) {
+  if (error instanceof FlyTabClientError) {
     const body = error.body as { error?: { code?: string; message?: string } } | null;
     if (body?.error?.code === "payment0030") {
       return Response.json(

@@ -12,7 +12,7 @@ import {
   ReceiptIcon,
   SparkIcon,
 } from "@/components/icons";
-import { checkIn } from "@/flynetClient";
+import { checkIn } from "@/flytabClient";
 import { ledgerFor } from "@/ledger/store";
 import { memberName } from "@/users/types";
 import { expireStaleTabs } from "@/tabs/service";

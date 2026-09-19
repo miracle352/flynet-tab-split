@@ -5,7 +5,7 @@ import type {
   Challenge,
   ChallengeList,
   CheckInList,
-  FlynetUser,
+  FlyTabUser,
   Address,
   CheckIn,
   Location,
@@ -21,8 +21,8 @@ import type {
 } from "./types";
 
 /**
- * All Flynet HTTP goes through this module. Callers must not fetch
- * Flynet URLs directly.
+ * All FlyTab HTTP goes through this module. Callers must not fetch
+ * FlyTab URLs directly.
  *
  * Server-only: reads API_KEY, CLIENT secrets, and MOCK_MODE from
  * process.env. Do not import from client components.
@@ -31,7 +31,7 @@ import type {
 const MOCK_LATENCY_MS = 250;
 
 /**
- * Mock mode serves the bundled fixtures instead of calling Flynet.
+ * Mock mode serves the bundled fixtures instead of calling FlyTab.
  *
  * `MOCK_MODE=true|false` always wins. When it is unset, fall back to
  * mock if no API key is configured — a fresh clone should run rather
@@ -62,11 +62,11 @@ function apiKey(): string {
 }
 
 function merchantId(): string | undefined {
-  return process.env.FLYNET_MERCHANT_ID || undefined;
+  return process.env.FLYTAB_MERCHANT_ID || undefined;
 }
 
 /**
- * Payee for payment intents. Flynet routes FLY to a merchant wallet, so
+ * Payee for payment intents. FlyTab routes FLY to a merchant wallet, so
  * this is the venue-side account the table settles with. Falls back to
  * the mock merchant so `MOCK_MODE=true` works with no credentials.
  */
@@ -82,20 +82,20 @@ async function mockDelay(): Promise<void> {
   await delay(MOCK_LATENCY_MS);
 }
 
-export class FlynetClientError extends Error {
+export class FlyTabClientError extends Error {
   constructor(
     message: string,
     readonly status: number,
     readonly body: unknown = null,
   ) {
     super(message);
-    this.name = "FlynetClientError";
+    this.name = "FlyTabClientError";
   }
 }
 
 type AuthMode = "apiKey" | "oauth";
 
-async function flynetFetch<T>(
+async function flytabFetch<T>(
   path: string,
   options: {
     method?: string;
@@ -106,7 +106,7 @@ async function flynetFetch<T>(
 ): Promise<T> {
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "User-Agent": "flynet-tab-split",
+    "User-Agent": "flytab",
   };
 
   if (options.auth === "apiKey") {
@@ -130,8 +130,8 @@ async function flynetFetch<T>(
 
   if (res.status === 204 || res.headers.get("content-length") === "0") {
     if (!res.ok) {
-      throw new FlynetClientError(
-        `Flynet ${res.status} with empty body`,
+      throw new FlyTabClientError(
+        `FlyTab ${res.status} with empty body`,
         res.status,
       );
     }
@@ -142,8 +142,8 @@ async function flynetFetch<T>(
   const json = text ? (JSON.parse(text) as unknown) : null;
 
   if (!res.ok) {
-    throw new FlynetClientError(
-      `Flynet ${res.status} on ${path}`,
+    throw new FlyTabClientError(
+      `FlyTab ${res.status} on ${path}`,
       res.status,
       json,
     );
@@ -358,7 +358,7 @@ function locationById(locationId: string): Location {
  * across them — a page render and an API call would otherwise mint two
  * different objects for the same input. Deriving ids from the input
  * keeps every instance in agreement without shared state, and is closer
- * to the live contract (Flynet returns stable ids).
+ * to the live contract (FlyTab returns stable ids).
  */
 function stableUuid(namespace: string, input: string): string {
   const hex = createHash("sha1").update(`${namespace}:${input}`).digest("hex");
@@ -379,7 +379,7 @@ function mockCheckInIdentity(locationId: string): {
 } {
   const offsetMinutes =
     createHash("sha1")
-      .update(`flynet-mock-check-in-at:${locationId}`)
+      .update(`flytab-mock-check-in-at:${locationId}`)
       .digest()
       .readUInt16BE(0) % 360;
 
@@ -387,7 +387,7 @@ function mockCheckInIdentity(locationId: string): {
   const opened = Date.parse("2026-06-11T18:30:00.000Z");
 
   return {
-    id: stableUuid("flynet-mock-check-in", locationId),
+    id: stableUuid("flytab-mock-check-in", locationId),
     created_at: new Date(opened + offsetMinutes * 60_000).toISOString(),
   };
 }
@@ -400,7 +400,7 @@ async function mockWallets(userId?: string): Promise<WalletList> {
   const member =
     (userId ? await getMember(userId) : null) ?? (await listMembers())[0];
   if (!member) {
-    throw new FlynetClientError("No member wallet available", 404);
+    throw new FlyTabClientError("No member wallet available", 404);
   }
   const fly = BigInt(member.balances.fly);
   return {
@@ -469,7 +469,7 @@ export async function listRestaurants(
     page: String(options.page ?? 0),
     page_size: String(options.page_size ?? 50),
   });
-  return flynetFetch<RestaurantList>(`/restaurants?${params}`, {
+  return flytabFetch<RestaurantList>(`/restaurants?${params}`, {
     auth: "apiKey",
   });
 }
@@ -496,7 +496,7 @@ export async function getRestaurantLocations(
     page: String(options.page ?? 0),
     page_size: String(options.page_size ?? 50),
   });
-  return flynetFetch<LocationList>(
+  return flytabFetch<LocationList>(
     `/restaurants/${restaurantId}/locations?${params}`,
     { auth: "apiKey" },
   );
@@ -531,14 +531,14 @@ export async function checkIn(locationId: string): Promise<CheckIn> {
     page: "0",
     page_size: "1",
   });
-  const list = await flynetFetch<{
+  const list = await flytabFetch<{
     check_ins: CheckIn[];
     pagination: Pagination;
   }>(`/check_ins?${params}`, { auth: "apiKey" });
 
   const checkInRecord = list.check_ins[0];
   if (!checkInRecord) {
-    throw new FlynetClientError(
+    throw new FlyTabClientError(
       `No check-in found for location ${locationId}`,
       404,
       list,
@@ -566,7 +566,7 @@ export async function createPaymentIntent(
         return existing;
       }
       if (existing) {
-        throw new FlynetClientError(
+        throw new FlyTabClientError(
           "Idempotency key already used for a non-pending intent",
           400,
           existing,
@@ -576,7 +576,7 @@ export async function createPaymentIntent(
 
     const now = new Date().toISOString();
     const intent: PendingPaymentIntent = {
-      id: stableUuid("flynet-mock-payment-intent", idemKey),
+      id: stableUuid("flytab-mock-payment-intent", idemKey),
       object: "payment_intent",
       payer_account_balance_id: MOCK_PAYER_BALANCE_ID,
       payee_account_balance_id: MOCK_PAYEE_BALANCE_ID,
@@ -599,7 +599,7 @@ export async function createPaymentIntent(
   const merchant = input.flynet_merchant_id ?? merchantId();
   if (!merchant) {
     // The docs require this on every create; omitting it 400s upstream.
-    throw new Error("FLYNET_MERCHANT_ID is not set");
+    throw new Error("FLYTAB_MERCHANT_ID is not set");
   }
 
   const body = {
@@ -612,7 +612,7 @@ export async function createPaymentIntent(
     ...(input.metadata ? { metadata: input.metadata } : {}),
   };
 
-  return flynetFetch<PendingPaymentIntent>("/payment_intents", {
+  return flytabFetch<PendingPaymentIntent>("/payment_intents", {
     method: "POST",
     auth: "oauth",
     accessToken: token,
@@ -633,7 +633,7 @@ export async function confirmPaymentIntent(
     await mockDelay();
     const current = mockPaymentIntents.get(paymentIntentId);
     if (!current) {
-      throw new FlynetClientError(
+      throw new FlyTabClientError(
         `Payment intent ${paymentIntentId} not found`,
         404,
       );
@@ -642,7 +642,7 @@ export async function confirmPaymentIntent(
       return current;
     }
     if (current.status !== "pending") {
-      throw new FlynetClientError(
+      throw new FlyTabClientError(
         "Intent is not in a confirmable state",
         400,
         current,
@@ -661,7 +661,7 @@ export async function confirmPaymentIntent(
     return paid;
   }
 
-  return flynetFetch<PaidPaymentIntent>(
+  return flytabFetch<PaidPaymentIntent>(
     `/payment_intents/${paymentIntentId}/confirm`,
     {
       method: "POST",
@@ -684,7 +684,7 @@ export async function getPaymentIntent(
     await mockDelay();
     const intent = mockPaymentIntents.get(paymentIntentId);
     if (!intent) {
-      throw new FlynetClientError(
+      throw new FlyTabClientError(
         `Payment intent ${paymentIntentId} not found`,
         404,
       );
@@ -692,7 +692,7 @@ export async function getPaymentIntent(
     return intent;
   }
 
-  return flynetFetch<PaymentIntent>(`/payment_intents/${paymentIntentId}`, {
+  return flytabFetch<PaymentIntent>(`/payment_intents/${paymentIntentId}`, {
     auth: "oauth",
     accessToken: token,
   });
@@ -712,7 +712,7 @@ export async function getWalletBalance(
   }
 
 
-  return flynetFetch<WalletList>("/users/me/wallets", {
+  return flytabFetch<WalletList>("/users/me/wallets", {
     auth: "oauth",
     accessToken: token,
   });
@@ -772,7 +772,7 @@ export async function listMyCheckIns(
   }
 
   const params = new URLSearchParams({ page: "0", page_size: "25" });
-  return flynetFetch<CheckInList>(`/users/me/check_ins?${params}`, {
+  return flytabFetch<CheckInList>(`/users/me/check_ins?${params}`, {
     auth: "oauth",
     accessToken: token,
   });
@@ -796,7 +796,7 @@ export async function listChallenges(
     page: String(options.page ?? 0),
     page_size: String(options.page_size ?? 50),
   });
-  return flynetFetch<ChallengeList>(`/challenges?${params}`, { auth: "apiKey" });
+  return flytabFetch<ChallengeList>(`/challenges?${params}`, { auth: "apiKey" });
 }
 
 function emptyPagination(): Pagination {
@@ -810,7 +810,7 @@ function emptyPagination(): Pagination {
 }
 
 /** GET /users/me — OAuth bearer (`read:profile`). */
-export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
+export async function getMyProfile(accessToken?: string): Promise<FlyTabUser> {
   const live = !isMockMode();
   const token = requireAccessToken(accessToken, live);
 
@@ -818,7 +818,7 @@ export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
     await mockDelay();
     const member = (await listMembers())[0];
     if (!member) {
-      throw new FlynetClientError("No member profile available", 404);
+      throw new FlyTabClientError("No member profile available", 404);
     }
     return {
       id: member.id,
@@ -829,7 +829,7 @@ export async function getMyProfile(accessToken?: string): Promise<FlynetUser> {
     };
   }
 
-  return flynetFetch<FlynetUser>("/users/me", { auth: "oauth", accessToken: token });
+  return flytabFetch<FlyTabUser>("/users/me", { auth: "oauth", accessToken: token });
 }
 
 /**
@@ -878,7 +878,7 @@ export async function cancelPaymentIntent(
     const now = new Date().toISOString();
     const current = mockPaymentIntents.get(paymentIntentId);
     if (!current) {
-      throw new FlynetClientError(
+      throw new FlyTabClientError(
         `Payment intent ${paymentIntentId} not found`,
         404,
       );
@@ -898,7 +898,7 @@ export async function cancelPaymentIntent(
     return canceled;
   }
 
-  return flynetFetch<PaymentIntent>(`/payment_intents/${paymentIntentId}/cancel`, {
+  return flytabFetch<PaymentIntent>(`/payment_intents/${paymentIntentId}/cancel`, {
     method: "POST",
     auth: "oauth",
     accessToken: token,

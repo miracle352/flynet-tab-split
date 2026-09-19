@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   const other = await getMember(otherId);
   if (!other) {
-    return Response.json({ error: "That person is not on Flynet yet" }, { status: 404 });
+    return Response.json({ error: "That person is not on FlyTab yet" }, { status: 404 });
   }
 
   try {

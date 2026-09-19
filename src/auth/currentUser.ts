@@ -1,4 +1,4 @@
-import { fetchLiveCurrentUser } from "@/flynetClient";
+import { fetchLiveCurrentUser } from "@/flytabClient";
 import { getMember, touchMember } from "@/users/store";
 import { getSession } from "./session";
 import { toCurrentUser, type CurrentUser } from "./types";
