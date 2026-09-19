@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       amount: WELCOME_FLY,
       label: "Welcome credit",
       detail: "Added when your wallet was created",
-      counterparty: "Flynet",
+      counterparty: "FlyTab",
     });
     await recordEntry({
       member_id: member.id,
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       amount: WELCOME_USDT,
       label: "Welcome credit",
       detail: "Added when your wallet was created",
-      counterparty: "Flynet",
+      counterparty: "FlyTab",
     });
 
     await setSession({ userId: member.id, accessToken: null });

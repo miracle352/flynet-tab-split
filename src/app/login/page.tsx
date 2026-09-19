@@ -4,7 +4,7 @@ import { AuthForm } from "./AuthForm";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to Flynet Tab Split or create a wallet.",
+  description: "Sign in to FlyTab or create a wallet.",
 };
 
 /** Same guard as `safeNext` in the proxy: relative, never protocol-relative. */

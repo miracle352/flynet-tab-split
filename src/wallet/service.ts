@@ -27,7 +27,7 @@ export function depositAddresses(member: Member): Record<Asset, DepositAddress> 
   const fly = `fly1${deterministicHex(`${member.id}:fly-deposit`, 20)}`;
   const usdt = `T${deterministicHex(`${member.id}:usdt-deposit`, 20)}`.slice(0, 34);
   return {
-    FLY: { asset: "FLY", address: fly, network: "Flynet" },
+    FLY: { asset: "FLY", address: fly, network: "FlyTab" },
     USDT: { asset: "USDT", address: usdt, network: "Tether · TRC-20" },
   };
 }
@@ -194,7 +194,7 @@ export async function executeSwap(
     amount: amountWei,
     label: from === "USDT" ? "Bought FLY with USDT" : "Sold FLY for USDT",
     detail: `Swapped at 1 FLY ≈ $${(swapQuote.quote.priceMicro / 1_000_000).toFixed(4)}`,
-    counterparty: "Flynet swap desk",
+    counterparty: "FlyTab swap desk",
   });
 
   const received = await recordEntry({
@@ -205,7 +205,7 @@ export async function executeSwap(
     amount: receive,
     label: `Received ${to}`,
     detail: `Proceeds of the ${from} → ${to} swap`,
-    counterparty: "Flynet swap desk",
+    counterparty: "FlyTab swap desk",
   });
 
   return { member: updated, receive, entries: [spent, received], quote: swapQuote };
@@ -296,7 +296,7 @@ export async function createSelfCustodyWallet(
   const updated = await updateMember(memberId, (member) => ({
     ...member,
     connected_wallet: {
-      provider: "Flynet Wallet",
+      provider: "FlyTab Wallet",
       address: mixed,
       connected_at: new Date().toISOString(),
     },

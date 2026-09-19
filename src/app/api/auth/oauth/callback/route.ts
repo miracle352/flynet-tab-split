@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getMyProfile } from "@/flynetClient";
+import { getMyProfile } from "@/flytabClient";
 import {
   exchangeCodeForToken,
   getOAuthConfig,

@@ -1,5 +1,5 @@
 /**
- * Flynet API response types.
+ * FlyTab API response types.
  *
  * Field names and shapes follow the published OpenAPI schemas and
  * docs examples (https://docs.flynet.org/llms-full.txt,
@@ -250,7 +250,7 @@ export interface ChallengeList {
 }
 
 /** GET /users/me */
-export interface FlynetUser {
+export interface FlyTabUser {
   id: string;
   object: "user";
   first_name: string;

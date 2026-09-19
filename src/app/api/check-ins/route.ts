@@ -1,4 +1,4 @@
-import { FlynetClientError, checkIn } from "@/flynetClient";
+import { FlyTabClientError, checkIn } from "@/flytabClient";
 import { getSession } from "@/auth/session";
 import { clearActiveCheckIn, setActiveCheckIn } from "@/checkInState";
 
@@ -6,7 +6,7 @@ import { clearActiveCheckIn, setActiveCheckIn } from "@/checkInState";
  * POST   /api/check-ins  { locationId } → { check_in }
  * DELETE /api/check-ins                 → clears the active check-in
  *
- * `checkIn()` is a get-or-create: Flynet has no partner endpoint to
+ * `checkIn()` is a get-or-create: FlyTab has no partner endpoint to
  * create a check-in, so this returns the venue's current check-in and
  * re-calling it is safe.
  */
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     });
     return Response.json({ check_in: record });
   } catch (error) {
-    if (error instanceof FlynetClientError) {
+    if (error instanceof FlyTabClientError) {
       return Response.json({ error: error.message }, { status: error.status });
     }
     throw error;

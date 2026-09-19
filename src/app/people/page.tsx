@@ -7,7 +7,7 @@ import { PeopleBrowser } from "./PeopleBrowser";
 
 export const metadata: Metadata = {
   title: "People",
-  description: "Search people on Flynet and see who you split with.",
+  description: "Search people on FlyTab and see who you split with.",
 };
 
 export default async function PeoplePage() {

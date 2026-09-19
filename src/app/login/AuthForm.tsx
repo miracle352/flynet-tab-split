@@ -101,9 +101,9 @@ export function AuthForm({
           <span className="flex items-center gap-3">
             <LogoMark size={40} />
             <span className="flex flex-col leading-none">
-              <span className="text-lg font-semibold tracking-tight">Flynet</span>
+              <span className="text-lg font-semibold tracking-tight">FlyTab</span>
               <span className="mt-1 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-[#c9f5e6]">
-                Tab Split
+                Split the check
               </span>
             </span>
           </span>
@@ -148,9 +148,9 @@ export function AuthForm({
           <span className="mb-8 flex items-center gap-3 lg:hidden">
             <LogoMark size={38} />
             <span className="flex flex-col leading-none">
-              <span className="text-base font-semibold tracking-tight">Flynet</span>
+              <span className="text-base font-semibold tracking-tight">FlyTab</span>
               <span className="mt-1 text-[0.625rem] font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
-                Tab Split
+                Split the check
               </span>
             </span>
           </span>
@@ -196,7 +196,7 @@ export function AuthForm({
               href={`/api/auth/oauth/start${next ? `?next=${encodeURIComponent(next)}` : ""}`}
               className="btn btn-ink btn-block btn-lg mt-7"
             >
-              Continue with Flynet
+              Continue with FlyTab
             </a>
           ) : null}
 

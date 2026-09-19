@@ -1,18 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
 
 /**
- * Flynet OAuth 2.0 + PKCE.
+ * FlyTab OAuth 2.0 + PKCE.
  *
  * This module only builds requests and parses responses — it never
  * touches cookies or Next.js APIs, so it can be unit tested.
  *
  * Configure with:
- *   FLYNET_CLIENT_ID
- *   FLYNET_CLIENT_SECRET
- *   FLYNET_OAUTH_REDIRECT_URI
- *   FLYNET_OAUTH_AUTHORIZE_URL   (authorization endpoint)
- *   FLYNET_OAUTH_TOKEN_URL       (token endpoint)
- *   FLYNET_OAUTH_SCOPES          (optional, space separated)
+ *   FLYTAB_CLIENT_ID
+ *   FLYTAB_CLIENT_SECRET
+ *   FLYTAB_OAUTH_REDIRECT_URI
+ *   FLYTAB_OAUTH_AUTHORIZE_URL   (authorization endpoint)
+ *   FLYTAB_OAUTH_TOKEN_URL       (token endpoint)
+ *   FLYTAB_OAUTH_SCOPES          (optional, space separated)
  */
 
 export interface OAuthConfig {
@@ -29,11 +29,11 @@ export const DEFAULT_SCOPES =
   "read:profile read:wallets read:user_checkins payments";
 
 export function getOAuthConfig(): OAuthConfig | null {
-  const clientId = process.env.FLYNET_CLIENT_ID;
-  const clientSecret = process.env.FLYNET_CLIENT_SECRET;
-  const redirectUri = process.env.FLYNET_OAUTH_REDIRECT_URI;
-  const authorizeUrl = process.env.FLYNET_OAUTH_AUTHORIZE_URL;
-  const tokenUrl = process.env.FLYNET_OAUTH_TOKEN_URL;
+  const clientId = process.env.FLYTAB_CLIENT_ID;
+  const clientSecret = process.env.FLYTAB_CLIENT_SECRET;
+  const redirectUri = process.env.FLYTAB_OAUTH_REDIRECT_URI;
+  const authorizeUrl = process.env.FLYTAB_OAUTH_AUTHORIZE_URL;
+  const tokenUrl = process.env.FLYTAB_OAUTH_TOKEN_URL;
 
   if (!clientId || !clientSecret || !redirectUri || !authorizeUrl || !tokenUrl) {
     return null;
@@ -45,7 +45,7 @@ export function getOAuthConfig(): OAuthConfig | null {
     redirectUri,
     authorizeUrl,
     tokenUrl,
-    scopes: process.env.FLYNET_OAUTH_SCOPES ?? DEFAULT_SCOPES,
+    scopes: process.env.FLYTAB_OAUTH_SCOPES ?? DEFAULT_SCOPES,
   };
 }
 
