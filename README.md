@@ -1,6 +1,6 @@
 # Flynet Tab Split
 
-**Splitting a restaurant bill, settled in $FLY — anchored to a real check-in.**
+**Splitting a restaurant bill, settled in $FLY anchored to a real check-in.**
 
 Splitting a check is still awkward. You either do cash maths at the table or fire off
 five disconnected payment requests afterwards. This settles the bill **at the table,
